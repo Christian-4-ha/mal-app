@@ -1,0 +1,36 @@
+// Eigene, einfache SVG-Symbole (keine Emoji: rendern auf Fire und iPad unterschiedlich).
+const svg = (body: string, vb = '0 0 64 64') =>
+  `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+
+export const icons: Record<string, string> = {
+  home: svg('<path d="M10 32 L32 12 L54 32" stroke="#5d4037" stroke-width="6"/><path d="M18 30 V52 H46 V30" fill="#ffcc80" stroke="#5d4037" stroke-width="5"/><rect x="28" y="38" width="9" height="14" fill="#8d6e63"/>'),
+  back: svg('<path d="M40 12 L20 32 L40 52" stroke="#5d4037" stroke-width="8"/>'),
+  plus: svg('<path d="M32 14 V50 M14 32 H50" stroke="#5d4037" stroke-width="8"/>'),
+  undo: svg('<path d="M22 22 H40 a14 14 0 0 1 0 28 H24" stroke="#1e88e5" stroke-width="7"/><path d="M28 10 L16 22 L28 34" stroke="#1e88e5" stroke-width="7"/>'),
+  clear: svg('<rect x="16" y="20" width="32" height="36" rx="4" fill="#eceff1" stroke="#546e7a" stroke-width="4"/><path d="M10 18 H54 M26 18 V10 H38 V18 M26 28 V48 M38 28 V48" stroke="#546e7a" stroke-width="4"/>'),
+  save: svg('<rect x="8" y="12" width="48" height="40" rx="3" fill="#ffe082" stroke="#8d6e63" stroke-width="5"/><rect x="16" y="20" width="32" height="24" fill="#fff"/><circle cx="26" cy="29" r="4" fill="#e53935"/><path d="M18 42 L28 34 L34 39 L40 32 L46 42 Z" fill="#7cb342"/>'),
+  saveError: svg('<circle cx="32" cy="32" r="24" fill="#e53935"/><path d="M32 18 V36 M32 44 V46" stroke="#fff" stroke-width="7"/>'),
+  zoom: svg('<circle cx="27" cy="27" r="15" fill="#e3f2fd" stroke="#37474f" stroke-width="5"/><path d="M38 38 L54 54" stroke="#37474f" stroke-width="8"/><path d="M21 27 H33 M27 21 V33" stroke="#37474f" stroke-width="4"/>'),
+  gallery: svg('<rect x="6" y="10" width="52" height="44" rx="4" fill="#ffe082" stroke="#8d6e63" stroke-width="5"/><rect x="14" y="18" width="36" height="28" fill="#fff"/><circle cx="25" cy="27" r="4" fill="#fdd835"/><path d="M16 44 L28 33 L35 39 L42 31 L48 44 Z" fill="#7cb342"/>'),
+  freePaint: svg('<path d="M12 52 C20 40 30 46 36 36 S50 26 54 14" stroke="#e53935" stroke-width="5"/><path d="M14 22 C22 18 26 28 34 22" stroke="#1e88e5" stroke-width="5"/><circle cx="46" cy="48" r="7" fill="#fdd835"/>'),
+  frameEmpty: svg('<rect x="6" y="10" width="52" height="44" rx="4" fill="#fff" stroke="#bcaaa4" stroke-width="4" stroke-dasharray="6 5"/>'),
+  rainbow: svg('<path d="M8 46 a24 24 0 0 1 48 0" stroke="#e53935" stroke-width="5"/><path d="M14 46 a18 18 0 0 1 36 0" stroke="#fdd835" stroke-width="5"/><path d="M20 46 a12 12 0 0 1 24 0" stroke="#43a047" stroke-width="5"/><path d="M26 46 a6 6 0 0 1 12 0" stroke="#1e88e5" stroke-width="5"/>'),
+  // Werkzeuge (currentColor = aktuell gewählte Farbe)
+  brush: svg('<path d="M44 8 L56 20 L32 42 L22 32 Z" fill="#8d6e63"/><path d="M22 32 L32 42 C28 52 16 56 8 56 C10 48 12 36 22 32 Z" fill="currentColor" stroke="#3e2723" stroke-width="2"/>'),
+  marker: svg('<path d="M40 6 L58 24 L30 52 L12 34 Z" fill="#90a4ae" stroke="#37474f" stroke-width="3"/><path d="M12 34 L30 52 L18 58 L6 46 Z" fill="currentColor" stroke="#37474f" stroke-width="3"/>'),
+  fineliner: svg('<path d="M46 6 L58 18 L22 54 L10 42 Z" fill="#cfd8dc" stroke="#37474f" stroke-width="3"/><path d="M10 42 L22 54 L6 58 Z" fill="currentColor" stroke="#37474f" stroke-width="2"/>'),
+  spray: svg('<rect x="22" y="22" width="22" height="36" rx="5" fill="currentColor" stroke="#37474f" stroke-width="3"/><rect x="27" y="12" width="12" height="10" fill="#90a4ae" stroke="#37474f" stroke-width="3"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/><circle cx="8" cy="18" r="2.5" fill="currentColor"/><circle cx="16" cy="18" r="2" fill="currentColor"/><circle cx="12" cy="25" r="2" fill="currentColor"/>'),
+  bucket: svg('<path d="M14 22 L40 22 L36 56 L18 56 Z" fill="#90a4ae" stroke="#37474f" stroke-width="3"/><path d="M14 22 C14 12 40 12 40 22" stroke="#37474f" stroke-width="3"/><path d="M40 26 C52 30 54 40 50 48 C48 42 44 36 40 34 Z" fill="currentColor" stroke="#37474f" stroke-width="2"/>'),
+  magic: svg('<path d="M10 54 L40 24" stroke="#5d4037" stroke-width="7"/><path d="M44 6 L47 15 L56 16 L49 22 L51 31 L44 26 L37 31 L39 22 L32 16 L41 15 Z" fill="#fdd835" stroke="#f57f17" stroke-width="2"/><circle cx="20" cy="16" r="3" fill="#ec407a"/><circle cx="54" cy="42" r="3" fill="#1e88e5"/>'),
+  pattern: svg('<path d="M10 50 C22 30 40 50 54 16" stroke="#cfd8dc" stroke-width="3" stroke-dasharray="2 6"/><path d="M14 40 l3 6 l6 1 l-5 4 l1 6 l-5 -3 l-5 3 l1 -6 l-5 -4 l6 -1 Z" fill="currentColor"/><path d="M44 14 l3 6 l6 1 l-5 4 l1 6 l-5 -3 l-5 3 l1 -6 l-5 -4 l6 -1 Z" fill="currentColor"/>'),
+  texture: svg('<path d="M10 46 C20 30 34 40 54 18" stroke="currentColor" stroke-width="14" opacity=".55"/><path d="M12 44 L16 40 M22 38 L26 35 M32 36 L36 33 M42 30 L46 26 M50 22 L53 19" stroke="#fff" stroke-width="3"/>'),
+  eraser: svg('<path d="M30 10 L54 34 L34 54 L22 54 L10 42 Z" fill="#f8bbd0" stroke="#880e4f" stroke-width="3"/><path d="M20 32 L42 54" stroke="#880e4f" stroke-width="3"/><path d="M34 56 H56" stroke="#90a4ae" stroke-width="3"/>'),
+  // Varianten
+  star: svg('<path d="M32 6 L39 24 L58 24 L43 36 L49 56 L32 44 L15 56 L21 36 L6 24 L25 24 Z" fill="currentColor"/>'),
+  heart: svg('<path d="M32 54 C10 38 6 26 14 16 C22 8 30 14 32 20 C34 14 42 8 50 16 C58 26 54 38 32 54 Z" fill="currentColor"/>'),
+  dot: svg('<circle cx="20" cy="32" r="9" fill="currentColor"/><circle cx="44" cy="32" r="9" fill="currentColor"/>'),
+  crayon: svg('<path d="M8 40 C20 28 36 44 56 24" stroke="currentColor" stroke-width="12" stroke-dasharray="3 2"/>'),
+  chalk: svg('<path d="M8 40 C20 28 36 44 56 24" stroke="currentColor" stroke-width="12" opacity=".5"/><path d="M8 40 C20 28 36 44 56 24" stroke="currentColor" stroke-width="4" stroke-dasharray="1 5"/>'),
+  fabric: svg('<path d="M8 40 C20 28 36 44 56 24" stroke="currentColor" stroke-width="12"/><path d="M14 30 L22 46 M24 30 L32 46 M34 28 L42 44 M44 24 L52 38" stroke="#fff" stroke-width="2" opacity=".6"/>'),
+  glitter: svg('<path d="M8 40 C20 28 36 44 56 24" stroke="currentColor" stroke-width="12" opacity=".7"/><circle cx="16" cy="34" r="2" fill="#fff"/><circle cx="30" cy="38" r="2" fill="#fff"/><circle cx="44" cy="32" r="2" fill="#fff"/><circle cx="52" cy="26" r="2" fill="#fff"/>'),
+};
