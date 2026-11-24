@@ -382,8 +382,19 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       const stopQuota = startQuotaSession(opts.profile, {
         onWarning: (_m, rem) => showHourglass(area, rem, opts.profile.defaultQuotaMin),
         onExpired: async () => {
+          // Sofort sperren; erst nach erfolgreichem Speichern zum Mond (bei Fehler alle 3 s erneut)
           finishStroke(false);
-          await doSave();
+          ready = false;
+          root.dataset.ready = 'false';
+          const lock = document.createElement('div');
+          lock.className = 'quota-lock';
+          lock.dataset.testid = 'quota-lock';
+          lock.innerHTML = icons.moon;
+          area.append(lock);
+          while ((await doSave()) === 'error') {
+            if (!root.isConnected) return;
+            await new Promise((r) => setTimeout(r, 3000));
+          }
           navigate(dayOverScreen(opts.profile));
         },
       });

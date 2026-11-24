@@ -95,13 +95,11 @@ async function forgotPin(): Promise<boolean> {
   return setupPin();
 }
 
-/**
- * Fragt die Eltern-PIN ab. Gibt es noch keine, wird sie jetzt festgelegt (erster Zugang zum Elternbereich).
- * Liefert true bei Erfolg.
- */
+/** Fragt die Eltern-PIN ab. Liefert true bei Erfolg. */
 export async function requestPin(): Promise<boolean> {
   const stored = await getSetting<StoredPin>(PIN_KEY);
-  if (!stored) return setupPin();
+  // Ohne PIN nie hier einrichten (sonst könnte ein Kind sie wählen); Einrichtung nur beim ersten Start
+  if (!stored) return false;
   let forgotten: Promise<boolean> | null = null;
   for (;;) {
     const pin = await askDigits('Eltern-PIN', { forgot: () => (forgotten = forgotPin()) });

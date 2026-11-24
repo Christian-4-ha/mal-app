@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { setupPinFlow } from './helpers';
+import { firstStartToNewProfile } from './helpers';
 
 test('Profil anlegen und auswählen', async ({ page }) => {
   await page.goto('/mal-app/');
-  await page.getByTestId('profile-add').click();
-  await setupPinFlow(page);
+  await firstStartToNewProfile(page);
   await page.getByLabel('Name').fill('Lena');
   await page.getByRole('button', { name: 'Fertig' }).click();
   await expect(page.getByTestId('profile-tile')).toHaveCount(1);

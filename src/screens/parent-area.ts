@@ -72,7 +72,7 @@ export function parentAreaScreen(): Screen {
           cleanups.push(renderAvatar(av, p));
           head.append(av, el('strong', p.name));
           const edit = el('button', 'Bearbeiten', 'file-btn');
-          edit.onclick = () => navigate(profileEditScreen(p, self));
+          edit.onclick = () => navigate(profileEditScreen(cur, self)); // aktueller Stand, nicht der alte
           const del = el('button', 'Löschen', 'file-btn danger');
           del.onclick = async () => {
             if (!confirm(`Profil „${p.name}“ löschen? Die Bilder kommen 30 Tage in den Papierkorb.`)) return;

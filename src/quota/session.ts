@@ -12,6 +12,8 @@ export async function remainingToday(profile: Profile): Promise<number> {
   return remainingSec(await allowedMinutes(day, profile), await getUsage(day, profile.id));
 }
 
+const pending = new Map<string, Promise<unknown>>();
+
 export interface QuotaHandlers {
   onWarning(minutesLeft: number, remainingSec: number): void;
   onExpired(): void;
@@ -32,18 +34,26 @@ export function startQuotaSession(profile: Profile, h: QuotaHandlers): () => voi
   let stopped = false;
   let expired = false;
 
-  const flush = async () => {
-    if (unsaved <= 0) return;
+  // Speichervorgänge je Profil nacheinander (auch über Sitzungen hinweg), damit nichts verloren geht
+  const flush = () => {
+    if (unsaved <= 0) return pending.get(profile.id);
     const n = unsaved;
+    const d = day;
     unsaved = 0;
-    await addUsage(day, profile.id, n);
+    const next = (pending.get(profile.id) ?? Promise.resolve())
+      .then(() => addUsage(d, profile.id, n))
+      .catch((e) => console.error(e));
+    pending.set(profile.id, next);
+    return next;
   };
+  const intervalMs = Math.min(1000, Math.max(20, secMs));
 
   const tick = () => {
     if (stopped) return;
     const now = performance.now();
     const visible = document.visibilityState !== 'hidden';
-    if (visible) carry += now - last;
+    // Deckel: eingefrorene Ticks (iOS im Hintergrund) dürfen keinen Riesensprung erzeugen
+    if (visible) carry += Math.min(now - last, intervalMs * 2);
     last = now;
     const secs = Math.floor(carry / secMs);
     if (secs <= 0 || expired) return;
@@ -69,7 +79,18 @@ export function startQuotaSession(profile: Profile, h: QuotaHandlers): () => voi
 
   let timer = 0;
   let saver = 0;
+  // Hintergrund: bis hierhin zählen und sichern; Rückkehr: Zeitpunkt neu setzen
+  const onVisibility = () => {
+    if (document.visibilityState === 'hidden') {
+      tick();
+      void flush();
+    } else {
+      last = performance.now();
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibility);
   void (async () => {
+    await pending.get(profile.id); // Rest der vorigen Sitzung erst sichern
     allowed = await allowedMinutes(day, profile);
     used = await getUsage(day, profile.id);
     if (stopped) return;
@@ -79,13 +100,14 @@ export function startQuotaSession(profile: Profile, h: QuotaHandlers): () => voi
       h.onExpired();
       return;
     }
-    timer = window.setInterval(tick, Math.min(1000, Math.max(20, secMs)));
+    timer = window.setInterval(tick, intervalMs);
     saver = window.setInterval(() => void flush(), 5000);
   })();
 
   return () => {
     tick();
     stopped = true;
+    document.removeEventListener('visibilitychange', onVisibility);
     clearInterval(timer);
     clearInterval(saver);
     void flush();

@@ -71,3 +71,11 @@ describe('Plan-2-Speicher', () => {
     expect(await listTrash()).toHaveLength(1);
   });
 });
+
+describe('Verbrauch gleichzeitig schreiben', () => {
+  beforeEach(freshDb);
+  it('parallele addUsage-Aufrufe verlieren nichts', async () => {
+    await Promise.all(Array.from({ length: 10 }, () => addUsage('2026-11-25', 'p1', 3)));
+    expect(await getUsage('2026-11-25', 'p1')).toBe(30);
+  });
+});

@@ -1,3 +1,4 @@
+import { db } from './db';
 import { getSetting, setSetting } from './settings';
 import type { Profile } from './types';
 
@@ -15,8 +16,12 @@ export async function getUsage(day: string, profileId: string): Promise<number> 
   return (await getSetting<number>(`usage:${day}:${profileId}`)) ?? 0;
 }
 
+/** Erhöht den Verbrauch atomar (eine Transaktion), damit parallele Aufrufe nichts verlieren. */
 export async function addUsage(day: string, profileId: string, sec: number): Promise<number> {
-  const total = (await getUsage(day, profileId)) + sec;
-  await setSetting(`usage:${day}:${profileId}`, total);
+  const key = `usage:${day}:${profileId}`;
+  const tx = (await db()).transaction('settings', 'readwrite');
+  const total = (((await tx.store.get(key)) as number | undefined) ?? 0) + sec;
+  await tx.store.put(total, key);
+  await tx.done;
   return total;
 }
