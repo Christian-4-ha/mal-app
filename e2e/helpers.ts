@@ -1,8 +1,22 @@
 import { expect, type Page } from '@playwright/test';
 
+export const PIN = '1234';
+
+export async function enterPin(page: Page, pin = PIN): Promise<void> {
+  for (const d of pin) await page.getByTestId('pin-key-' + d).click();
+}
+
+/** Erster Zugang: PIN wird festgelegt (zweimal eingeben). */
+export async function setupPinFlow(page: Page, pin = PIN): Promise<void> {
+  await enterPin(page, pin);
+  await expect(page.getByText('PIN wiederholen')).toBeVisible();
+  await enterPin(page, pin);
+}
+
 export async function createAndOpenProfile(page: Page, name = 'Lena'): Promise<void> {
   await page.goto('/mal-app/');
   await page.getByTestId('profile-add').click();
+  await setupPinFlow(page);
   await page.getByLabel('Name').fill(name);
   await page.getByRole('button', { name: 'Fertig' }).click();
   await page.getByTestId('profile-tile').first().click();

@@ -5,9 +5,13 @@ import { listPictures } from '../storage/pictures';
 import { icons } from '../ui/icons';
 import { paintScreen } from '../paint/paint-screen';
 import { modeMenuScreen } from './mode-menu';
+import { profileSelectScreen } from './profile-select';
 
-/** Bilder des Profils, neueste zuerst. Antippen → weitermalen. Kein Löschen für Kinder. */
-export function galleryScreen(profile: Profile): Screen {
+/**
+ * Bilder des Profils, neueste zuerst. Antippen → weitermalen. Kein Löschen für Kinder.
+ * viewOnly (Kontingent aufgebraucht): Antippen zeigt das Bild nur groß an.
+ */
+export function galleryScreen(profile: Profile, opts: { viewOnly?: boolean } = {}): Screen {
   const urls: string[] = [];
   return {
     name: 'gallery',
@@ -17,7 +21,7 @@ export function galleryScreen(profile: Profile): Screen {
       back.className = 'icon-btn gallery-back';
       back.setAttribute('aria-label', 'Zurück');
       back.innerHTML = icons.back;
-      back.onclick = () => navigate(modeMenuScreen(profile));
+      back.onclick = () => navigate(opts.viewOnly ? profileSelectScreen() : modeMenuScreen(profile));
       const grid = document.createElement('div');
       grid.className = 'gallery-grid';
       root.append(back, grid);
@@ -41,7 +45,15 @@ export function galleryScreen(profile: Profile): Screen {
           img.src = url;
           img.alt = '';
           b.append(img);
-          b.onclick = () => navigate(paintScreen({ profile, modeId: pic.modeId, picture: pic }));
+          b.onclick = () => {
+            if (!opts.viewOnly) return void navigate(paintScreen({ profile, modeId: pic.modeId, picture: pic }));
+            const big = document.createElement('div');
+            big.className = 'lightbox';
+            big.dataset.testid = 'lightbox';
+            big.innerHTML = `<img src="${url}" alt="">`;
+            big.onclick = () => big.remove();
+            root.append(big);
+          };
           grid.append(b);
         }
       });

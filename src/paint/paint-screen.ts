@@ -20,6 +20,8 @@ import { strokeWidthOnCanvas } from './size-drag';
 import { showSaveToast } from './save-toast';
 import { getTemplateSource } from '../templates';
 import { svgToImage } from '../templates/svg-image';
+import { startQuotaSession } from '../quota/session';
+import { dayOverScreen } from '../screens/day-over';
 
 export interface PaintScreenOptions {
   profile: Profile;
@@ -376,6 +378,17 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         vp.removeEventListener('pointercancel', onCancel);
       });
 
+      // --- Tageskontingent: Hinweise (Sanduhr) und Ende ---
+      const stopQuota = startQuotaSession(opts.profile, {
+        onWarning: (_m, rem) => showHourglass(area, rem, opts.profile.defaultQuotaMin),
+        onExpired: async () => {
+          finishStroke(false);
+          await doSave();
+          navigate(dayOverScreen(opts.profile));
+        },
+      });
+      cleanups.push(stopQuota);
+
       // Verlassen: speichern; schlägt das fehl, bleibt die Malfläche offen (nichts geht verloren)
       leave = async () => {
         finishStroke(false);
@@ -403,4 +416,16 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       return true;
     },
   };
+}
+
+/** Hinweis vor Ablauf, ohne Text: Sanduhr mit Restzeit-Balken, blockiert das Malen nicht. */
+function showHourglass(host: HTMLElement, remainingSec: number, totalMin: number): void {
+  host.querySelector('.hourglass-toast')?.remove();
+  const t = document.createElement('div');
+  t.className = 'hourglass-toast';
+  t.dataset.testid = 'quota-warning';
+  const share = Math.max(0.05, Math.min(1, remainingSec / Math.max(60, totalMin * 60)));
+  t.innerHTML = `${icons.hourglass}<span class="rest-bar"><span style="width:${Math.round(share * 100)}%"></span></span>`;
+  host.append(t);
+  setTimeout(() => t.remove(), 3500);
 }
