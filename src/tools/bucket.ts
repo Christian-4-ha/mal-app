@@ -1,6 +1,6 @@
 import type { Tool } from './types';
 import { icons } from '../ui/icons';
-import { floodFill } from '../paint/flood-fill';
+import { fillMask, floodFill, floodRegion } from '../paint/flood-fill';
 
 export function hexToRgba(hex: string): [number, number, number, number] {
   const n = parseInt(hex.slice(1, 7), 16);
@@ -18,6 +18,15 @@ export function createBucket(): Tool {
     defaultSize: 0,
     begin(c, p) {
       const { width, height } = c.ctx.canvas;
+      if (c.boundary) {
+        // Ausmalen: genau eine Fläche der Vorlage; auf einer Linie getippt → nichts
+        const mask = floodRegion(c.boundary, p.x, p.y);
+        if (!mask) return;
+        const img = c.ctx.getImageData(0, 0, width, height);
+        fillMask(img, mask, hexToRgba(c.color));
+        c.ctx.putImageData(img, 0, 0);
+        return;
+      }
       const img = c.ctx.getImageData(0, 0, width, height);
       if (floodFill(img, p.x, p.y, hexToRgba(c.color)) > 0) c.ctx.putImageData(img, 0, 0);
     },

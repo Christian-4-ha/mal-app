@@ -58,3 +58,49 @@ export function floodFill(img: ImageData, x: number, y: number, rgba: RGBA, tole
   for (const p of fringe) d.set(rgba, p * 4);
   return count;
 }
+
+/**
+ * Fläche einer Vorlage: zusammenhängende Pixel mit geringer Deckkraft (keine Linie) ab (x, y).
+ * null, wenn der Startpunkt auf einer Linie oder außerhalb liegt.
+ */
+export function floodRegion(lines: ImageData, x: number, y: number, alphaLimit = 128): Uint8Array | null {
+  const { width: w, height: h, data: d } = lines;
+  x = Math.floor(x);
+  y = Math.floor(y);
+  if (x < 0 || y < 0 || x >= w || y >= h) return null;
+  const open = (p: number) => d[p * 4 + 3] <= alphaLimit;
+  if (!open(y * w + x)) return null;
+  const mask = new Uint8Array(w * h);
+  const stack = [y * w + x];
+  while (stack.length) {
+    const p = stack.pop()!;
+    if (mask[p] || !open(p)) continue;
+    let l = p;
+    while (l % w > 0 && !mask[l - 1] && open(l - 1)) l--;
+    let r = p;
+    while (r % w < w - 1 && !mask[r + 1] && open(r + 1)) r++;
+    const row = Math.floor(p / w);
+    for (let q = l; q <= r; q++) {
+      mask[q] = 1;
+      if (row > 0 && !mask[q - w] && open(q - w)) stack.push(q - w);
+      if (row < h - 1 && !mask[q + w] && open(q + w)) stack.push(q + w);
+    }
+  }
+  return mask;
+}
+
+/** Färbt die Maske, um `dilate` Pixel erweitert (die Ränder liegen unter den Vorlagenlinien). */
+export function fillMask(target: ImageData, mask: Uint8Array, rgba: RGBA, dilate = 2): void {
+  const { width: w, height: h } = target;
+  let m = mask;
+  for (let i = 0; i < dilate; i++) {
+    const next = new Uint8Array(m);
+    for (let p = 0; p < w * h; p++) {
+      if (m[p]) continue;
+      const px = p % w;
+      if ((px > 0 && m[p - 1]) || (px < w - 1 && m[p + 1]) || (p >= w && m[p - w]) || (p < w * (h - 1) && m[p + w])) next[p] = 1;
+    }
+    m = next;
+  }
+  for (let p = 0; p < w * h; p++) if (m[p]) target.data.set(rgba, p * 4);
+}

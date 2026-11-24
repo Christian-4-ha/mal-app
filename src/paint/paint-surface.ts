@@ -20,6 +20,10 @@ export interface PaintSurface {
   /** Überträgt die Zwischenebene mit Deckkraft auf die Malebene und leert sie. */
   commitOverlay(alpha: number): void;
   loadImage(b: Blob): Promise<void>;
+  /** Vorlagenlinien (liegen immer obenauf, werden nie bemalt/radiert), proportional eingepasst. */
+  setTemplate(img: CanvasImageSource & { width: number; height: number }): void;
+  /** Pixel der Vorlagenebene (Grenzen für den Eimer) oder null ohne Vorlage. */
+  templateData(): ImageData | null;
   toBlobs(): Promise<{ paint: Blob; thumb: Blob; width: number; height: number }>;
 }
 
@@ -49,6 +53,9 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
   };
   const paint = mk('paint');
   const overlay = mk('overlay');
+  const template = mk('template');
+  let templateCache: ImageData | null = null;
+  let hasTemplate = false;
   viewport.append(stage);
   host.append(viewport);
 
@@ -91,6 +98,21 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
       pctx.drawImage(bmp, (paint.width - dw) / 2, (paint.height - dh) / 2, dw, dh);
       bmp.close();
     },
+    setTemplate(img) {
+      const tctx = template.getContext('2d', { willReadFrequently: true })!;
+      tctx.clearRect(0, 0, template.width, template.height);
+      const k = Math.min(template.width / img.width, template.height / img.height);
+      const dw = img.width * k;
+      const dh = img.height * k;
+      tctx.drawImage(img, (template.width - dw) / 2, (template.height - dh) / 2, dw, dh);
+      hasTemplate = true;
+      templateCache = null;
+    },
+    templateData() {
+      if (!hasTemplate) return null;
+      templateCache ??= template.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, template.width, template.height);
+      return templateCache;
+    },
     async toBlobs() {
       const out = encodeCanvas(paint);
       const k = Math.min(1, THUMB_MAX_W / paint.width);
@@ -101,6 +123,7 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
       tctx.fillStyle = '#fff';
       tctx.fillRect(0, 0, t.width, t.height);
       tctx.drawImage(paint, 0, 0, t.width, t.height);
+      if (hasTemplate) tctx.drawImage(template, 0, 0, t.width, t.height);
       return { paint: out, thumb: encodeCanvas(t, 'image/jpeg', 0.8), width: paint.width, height: paint.height };
     },
   };

@@ -68,3 +68,29 @@ describe('magicHue', () => {
     expect(magicHue(400)).toBe(100);
   });
 });
+
+import { fillMask, floodRegion } from './flood-fill';
+
+describe('floodRegion / fillMask (Vorlagenlinien als Grenze)', () => {
+  it('Maske umfasst nur das Innere des Rahmens', () => {
+    const lines = imageWithSquareOutline();
+    const mask = floodRegion(lines as ImageData, 10, 10)!;
+    expect(mask[10 * 20 + 10]).toBe(1);
+    expect(mask[1 * 20 + 1]).toBe(0);
+    expect(mask[5 * 20 + 10]).toBe(0); // Linie selbst
+  });
+
+  it('Start auf einer Linie liefert null', () => {
+    expect(floodRegion(imageWithSquareOutline() as ImageData, 5, 5)).toBeNull();
+  });
+
+  it('fillMask färbt Maske plus Rand unter der Linie', () => {
+    const mask = floodRegion(imageWithSquareOutline() as ImageData, 10, 10)!;
+    const paint = blank(20, 20);
+    fillMask(paint as ImageData, mask, [0, 255, 0, 255], 2);
+    expect(px(paint, 10, 10)).toEqual([0, 255, 0, 255]);
+    expect(px(paint, 5, 10)).toEqual([0, 255, 0, 255]); // unter der Linie (1 px)
+    expect(px(paint, 4, 10)).toEqual([0, 255, 0, 255]); // 2 px Dilatation
+    expect(px(paint, 3, 10)).toEqual([0, 0, 0, 0]);
+  });
+});

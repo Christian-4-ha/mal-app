@@ -13,6 +13,8 @@ export interface ToolContext {
   /** Strichdicke in Leinwandpixeln. */
   size: number;
   variant: string | null;
+  /** Vorlagenlinien als Flächengrenzen (Ausmalen); null im freien Malen. */
+  boundary?: ImageData | null;
 }
 
 export interface ToolVariant {

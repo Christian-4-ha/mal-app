@@ -5,12 +5,25 @@ export interface AppContext {
   profile: Profile;
 }
 
+export interface MenuTile {
+  id: string;
+  icon: string;
+  onTap(): void;
+}
+
+/** Zusatzreihen im Modus-Menü (Reihe 2: z. B. Themen, Reihe 3: z. B. Vorlagen). */
+export interface MenuRows {
+  setRow(level: 2 | 3, items: MenuTile[] | null): void;
+}
+
+/** Ein Modus öffnet entweder direkt einen Bildschirm (open) oder zeigt Zusatzreihen (expand). */
 export interface Mode {
   id: string;
   icon: string;
   order: number;
   pinnedFirst?: boolean;
-  open(ctx: AppContext): Screen;
+  open?(ctx: AppContext): Screen;
+  expand?(ctx: AppContext, rows: MenuRows): void;
 }
 
 const modes = new Map<string, Mode>();

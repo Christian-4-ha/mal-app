@@ -6,8 +6,9 @@ test('Galerie steht oben links vor Freies Malen', async ({ page }) => {
   await page.getByLabel('Name').fill('Mia');
   await page.getByRole('button', { name: 'Fertig' }).click();
   await page.getByTestId('profile-tile').first().click();
-  const tiles = page.locator('[data-screen="mode-menu"] [data-tile]');
-  await expect(tiles).toHaveCount(2);
+  const tiles = page.locator('[data-row="1"] [data-tile]');
+  await expect(tiles).toHaveCount(3);
   await expect(tiles.nth(0)).toHaveAttribute('data-tile', 'gallery');
   await expect(tiles.nth(1)).toHaveAttribute('data-tile', 'free-paint');
+  await expect(tiles.nth(2)).toHaveAttribute('data-tile', 'coloring');
 });

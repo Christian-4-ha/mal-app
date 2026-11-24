@@ -18,11 +18,15 @@ import { createPicture, overwritePicture } from '../storage/pictures';
 import { clampRect, growRect, type Rect } from './rect';
 import { strokeWidthOnCanvas } from './size-drag';
 import { showSaveToast } from './save-toast';
+import { getTemplateSource } from '../templates';
+import { svgToImage } from '../templates/svg-image';
 
 export interface PaintScreenOptions {
   profile: Profile;
   modeId: string;
   picture?: Picture;
+  /** Ausmalen: Vorlage (bei picture wird dessen templateId genutzt). */
+  templateId?: string;
 }
 
 /** Rückgängig-Eintrag: nur der veränderte Ausschnitt vor der Änderung. */
@@ -60,7 +64,11 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       toolCol.className = 'tool-column';
       root.append(area, colorCol, toolCol);
 
+      const templateId = opts.templateId ?? opts.picture?.templateId ?? null;
       const surface: PaintSurface = createPaintSurface(area);
+      // Bis Vorlage und Bild geladen sind, ist Malen gesperrt (sonst landet ein Strich unter dem Bild)
+      let ready = false;
+      root.dataset.ready = 'false';
       const pctx = surface.paint.getContext('2d')!;
       const octx = surface.overlay.getContext('2d')!;
       const W = surface.paint.width;
@@ -98,7 +106,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       const saver = createSaveController({
         profileId: opts.profile.id,
         modeId: opts.modeId,
-        templateId: opts.picture?.templateId ?? null,
+        templateId,
         existing: opts.picture ?? null,
         getBlobs: () => surface.toBlobs(),
         isBlank: () => surface.isBlank(),
@@ -271,6 +279,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
           color,
           size: strokeWidthOnCanvas(sizes.get(tool.id) ?? tool.defaultSize, surface.ratio, surface.view().scale),
           variant: variants.get(tool.id) ?? null,
+          boundary: surface.templateData(),
         };
         // Rand großzügig: weiche Pinselkante, Sprühradius, gedrehte Musterformen
         pad = strokeCtx.size * 1.5 + 4;
@@ -301,6 +310,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         const x = e.clientX - r.left;
         const y = e.clientY - r.top;
         const type = (e.pointerType || 'mouse') as RouterEvent['type'];
+        if (!ready) return;
         const a = route({ kind, id: e.pointerId, type, x, y });
         switch (a.do) {
           case 'strokeStart':
@@ -373,7 +383,19 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       };
 
       updateUndo();
-      if (opts.picture) surface.loadImage(opts.picture.paint).catch((e) => console.error(e));
+      void (async () => {
+        try {
+          if (templateId) {
+            const svg = await getTemplateSource().loadSvg(templateId);
+            if (svg) surface.setTemplate(await svgToImage(svg));
+          }
+          if (opts.picture) await surface.loadImage(opts.picture.paint);
+        } catch (e) {
+          console.error(e); // Bild öffnet trotzdem, notfalls ohne Linien
+        }
+        ready = true;
+        root.dataset.ready = 'true';
+      })();
     },
     async unmount() {
       if (!(await leave())) return false;

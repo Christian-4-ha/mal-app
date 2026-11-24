@@ -1,11 +1,15 @@
 import type { Screen } from '../app/screen';
 import type { Profile } from '../storage/types';
 import { navigate } from '../app/router';
-import { listModes } from '../modes/registry';
+import { listModes, type MenuRows, type MenuTile } from '../modes/registry';
 import { createTileRow } from '../ui/tile-row';
 import { renderAvatar } from '../ui/avatar';
 import { icons } from '../ui/icons';
 import { profileSelectScreen } from './profile-select';
+
+function markActive(row: HTMLElement, id: string) {
+  row.querySelectorAll<HTMLElement>('[data-tile]').forEach((t) => t.classList.toggle('active', t.dataset.tile === id));
+}
 
 export function modeMenuScreen(profile: Profile): Screen {
   let cleanup = () => undefined as void;
@@ -25,10 +29,43 @@ export function modeMenuScreen(profile: Profile): Screen {
       cleanup = renderAvatar(av, profile);
       top.append(back, av);
 
-      const row = createTileRow(
-        listModes().map((m) => ({ id: m.id, icon: m.icon, onTap: () => navigate(m.open({ profile })) })),
+      const slots: Record<2 | 3, HTMLElement | null> = { 2: null, 3: null };
+      const rows: MenuRows = {
+        setRow(level, items) {
+          if (level === 2) rows.setRow(3, null);
+          slots[level]?.remove();
+          slots[level] = null;
+          if (!items) return;
+          const tagged: MenuTile[] = items.map((it) => ({
+            ...it,
+            onTap: () => {
+              markActive(row, it.id);
+              it.onTap();
+            },
+          }));
+          const row = createTileRow(tagged, { size: level === 2 ? 150 : 190 });
+          row.dataset.row = String(level);
+          slots[level] = row;
+          root.append(row);
+        },
+      };
+
+      const modeRow = createTileRow(
+        listModes().map((m) => ({
+          id: m.id,
+          icon: m.icon,
+          onTap: () => {
+            markActive(modeRow, m.id);
+            if (m.expand) m.expand({ profile }, rows);
+            else if (m.open) {
+              rows.setRow(2, null);
+              navigate(m.open({ profile }));
+            }
+          },
+        })),
       );
-      root.append(top, row);
+      modeRow.dataset.row = '1';
+      root.append(top, modeRow);
     },
     unmount() {
       cleanup();
