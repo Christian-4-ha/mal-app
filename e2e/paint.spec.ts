@@ -1,0 +1,36 @@
+import { test, expect } from '@playwright/test';
+import { centerAlpha, createAndOpenProfile, drawStroke, openFreePaint } from './helpers';
+
+test('Strich malen und rückgängig machen', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  const undo = page.getByTestId('undo');
+  await expect(undo).toHaveAttribute('aria-disabled', 'true');
+  await drawStroke(page);
+  await expect(undo).toHaveAttribute('aria-disabled', 'false');
+  expect(await centerAlpha(page)).toBeGreaterThan(0);
+  await undo.click();
+  await expect(undo).toHaveAttribute('aria-disabled', 'true');
+  expect(await centerAlpha(page)).toBe(0);
+});
+
+test('Leeren ist rückgängig machbar', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  await drawStroke(page);
+  await page.getByTestId('clear').click();
+  expect(await centerAlpha(page)).toBe(0);
+  await page.getByTestId('undo').click();
+  expect(await centerAlpha(page)).toBeGreaterThan(0);
+});
+
+test('Werkzeuge und Farben stehen rechts', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  const area = (await page.locator('.paint-area').boundingBox())!;
+  const tools = (await page.locator('.tool-column').boundingBox())!;
+  const colors = (await page.locator('.color-column').boundingBox())!;
+  expect(colors.x).toBeGreaterThanOrEqual(area.x + area.width - 1);
+  expect(tools.x).toBeGreaterThan(colors.x); // Werkzeuge ganz außen
+  await expect(page.locator('.tool-column [data-tool]')).toHaveCount(4);
+});
