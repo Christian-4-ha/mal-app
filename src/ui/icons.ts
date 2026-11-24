@@ -14,6 +14,7 @@ export const icons: Record<string, string> = {
   gallery: svg('<rect x="6" y="10" width="52" height="44" rx="4" fill="#ffe082" stroke="#8d6e63" stroke-width="5"/><rect x="14" y="18" width="36" height="28" fill="#fff"/><circle cx="25" cy="27" r="4" fill="#fdd835"/><path d="M16 44 L28 33 L35 39 L42 31 L48 44 Z" fill="#7cb342"/>'),
   freePaint: svg('<path d="M12 52 C20 40 30 46 36 36 S50 26 54 14" stroke="#e53935" stroke-width="5"/><path d="M14 22 C22 18 26 28 34 22" stroke="#1e88e5" stroke-width="5"/><circle cx="46" cy="48" r="7" fill="#fdd835"/>'),
   frameEmpty: svg('<rect x="6" y="10" width="52" height="44" rx="4" fill="#fff" stroke="#bcaaa4" stroke-width="4" stroke-dasharray="6 5"/>'),
+  check: svg('<circle cx="32" cy="32" r="28" fill="#43a047"/><path d="M18 33 L28 43 L47 22" stroke="#fff" stroke-width="8"/>'),
   rainbow: svg('<path d="M8 46 a24 24 0 0 1 48 0" stroke="#e53935" stroke-width="5"/><path d="M14 46 a18 18 0 0 1 36 0" stroke="#fdd835" stroke-width="5"/><path d="M20 46 a12 12 0 0 1 24 0" stroke="#43a047" stroke-width="5"/><path d="M26 46 a6 6 0 0 1 12 0" stroke="#1e88e5" stroke-width="5"/>'),
   // Werkzeuge (currentColor = aktuell gewählte Farbe)
   brush: svg('<path d="M44 8 L56 20 L32 42 L22 32 Z" fill="#8d6e63"/><path d="M22 32 L32 42 C28 52 16 56 8 56 C10 48 12 36 22 32 Z" fill="currentColor" stroke="#3e2723" stroke-width="2"/>'),

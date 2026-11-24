@@ -48,3 +48,12 @@ describe('sizeFromDrag', () => {
     expect(sizeFromDrag(10, 0, 1, 80)).toBe(10);
   });
 });
+
+import { strokeWidthOnCanvas } from './size-drag';
+
+describe('strokeWidthOnCanvas', () => {
+  it('bleibt beim Zoomen auf dem Bildschirm gleich dick', () => {
+    expect(strokeWidthOnCanvas(18, 2, 1)).toBe(36);
+    expect(strokeWidthOnCanvas(18, 2, 4)).toBe(9);
+  });
+});

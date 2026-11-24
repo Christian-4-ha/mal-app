@@ -16,6 +16,8 @@ import { openPalettePopup } from './palette-popup';
 import { createSaveController } from './save-controller';
 import { createPicture, overwritePicture } from '../storage/pictures';
 import { clampRect, growRect, type Rect } from './rect';
+import { strokeWidthOnCanvas } from './size-drag';
+import { showSaveToast } from './save-toast';
 
 export interface PaintScreenOptions {
   profile: Profile;
@@ -118,7 +120,10 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         }
         return r;
       };
-      saveBtn.onclick = () => void doSave();
+      // Sichtbare Bestätigung beim bewussten Speichern (Feedback)
+      saveBtn.onclick = async () => {
+        if ((await doSave()) !== 'error') showSaveToast(area);
+      };
 
       const updateUndo = () => undo.setAttribute('aria-disabled', String(!history.canUndo()));
       const changed = () => {
@@ -155,7 +160,11 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       custom.className = 'swatch custom';
       custom.dataset.testid = 'custom-color';
       custom.hidden = true;
-      colorCol.append(rainbow, custom);
+      const sizeCtl = createSizeControl((s) => {
+        sizes.set(tool.id, s);
+      });
+      // Reihenfolge (Feedback): Regenbogen, Größen-Punkt, eigene Farbe, Grundfarben
+      colorCol.append(rainbow, sizeCtl.el, custom);
       const swatches: HTMLButtonElement[] = [];
       const addSwatch = (c: string) => {
         const el = document.createElement('button');
@@ -177,10 +186,6 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
           if (!swatches.includes(custom)) swatches.push(custom);
           selectColor(c);
         });
-      const sizeCtl = createSizeControl((s) => {
-        sizes.set(tool.id, s);
-      });
-      colorCol.append(sizeCtl.el);
 
       // --- Werkzeuge ---
       const toolButtons = new Map<string, HTMLButtonElement>();
@@ -264,7 +269,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         strokeCtx = {
           ctx: useOverlay ? octx : pctx,
           color,
-          size: (sizes.get(tool.id) ?? tool.defaultSize) * surface.ratio,
+          size: strokeWidthOnCanvas(sizes.get(tool.id) ?? tool.defaultSize, surface.ratio, surface.view().scale),
           variant: variants.get(tool.id) ?? null,
         };
         // Rand großzügig: weiche Pinselkante, Sprühradius, gedrehte Musterformen
