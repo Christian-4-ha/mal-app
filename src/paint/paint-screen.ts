@@ -11,6 +11,7 @@ import { createPointerRouter, type RouterEvent } from './pointer-router';
 import { createSizeControl } from './size-control';
 import { IDENTITY, pinch, screenToCanvas, type Pt } from './view-transform';
 import { modeMenuScreen } from '../screens/mode-menu';
+import { openVariantPopup } from './variant-popup';
 
 export interface PaintScreenOptions {
   profile: Profile;
@@ -122,13 +123,40 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         b.dataset.testid = 'tool-' + t.id;
         b.setAttribute('aria-label', t.id);
         b.innerHTML = t.icon;
-        b.onclick = () => selectTool(t);
+        if (t.variants) {
+          const badge = document.createElement('span');
+          badge.className = 'variant-badge';
+          b.append(badge);
+        }
+        let held = false;
+        let holdTimer = 0;
+        b.onpointerdown = () => {
+          held = false;
+          if (!t.variants) return;
+          holdTimer = window.setTimeout(() => {
+            held = true;
+            selectTool(t);
+            openVariantPopup(b, t.variants!, variants.get(t.id) ?? null, color, (id) => {
+              variants.set(t.id, id);
+              refresh();
+            });
+          }, 400);
+        };
+        b.onpointerup = b.onpointerleave = b.onpointercancel = () => clearTimeout(holdTimer);
+        b.onclick = () => {
+          if (!held) selectTool(t);
+        };
         toolButtons.set(t.id, b);
         toolCol.append(b);
       }
 
       const refresh = () => {
-        for (const [id, b] of toolButtons) b.classList.toggle('active', id === tool.id);
+        for (const [id, b] of toolButtons) {
+          b.classList.toggle('active', id === tool.id);
+          const badge = b.querySelector('.variant-badge');
+          const v = tools.find((x) => x.id === id)?.variants?.find((x) => x.id === variants.get(id));
+          if (badge && v) badge.innerHTML = v.icon;
+        }
         for (const s of swatches) s.classList.toggle('active', s.dataset.color === color);
         toolCol.style.color = color;
         sizeCtl.set(sizes.get(tool.id) ?? tool.defaultSize, color, tool.minSize, tool.maxSize);
@@ -227,6 +255,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       vp.addEventListener('pointerup', onUp);
       vp.addEventListener('pointercancel', onCancel);
       cleanups.push(() => {
+        if (drawing && strokeCtx) tool.end(strokeCtx); // z. B. Sprüh-Timer stoppen
         vp.removeEventListener('pointerdown', onDown);
         vp.removeEventListener('pointermove', onMove);
         vp.removeEventListener('pointerup', onUp);
