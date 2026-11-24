@@ -15,12 +15,23 @@ import { openVariantPopup } from './variant-popup';
 import { openPalettePopup } from './palette-popup';
 import { createSaveController } from './save-controller';
 import { createPicture, overwritePicture } from '../storage/pictures';
+import { clampRect, growRect, type Rect } from './rect';
 
 export interface PaintScreenOptions {
   profile: Profile;
   modeId: string;
   picture?: Picture;
 }
+
+/** Rückgängig-Eintrag: nur der veränderte Ausschnitt vor der Änderung. */
+interface UndoEntry {
+  rect: Rect;
+  data: ImageData;
+}
+
+const UNDO_MAX_STEPS = 20;
+const UNDO_MAX_BYTES = 60 * 1024 * 1024; // altes iPad: Speicher schonen
+const IDLE_SAVE_MS = 4000;
 
 function iconButton(icon: string, label: string, testid: string): HTMLButtonElement {
   const b = document.createElement('button');
@@ -33,7 +44,7 @@ function iconButton(icon: string, label: string, testid: string): HTMLButtonElem
 
 export function paintScreen(opts: PaintScreenOptions): Screen {
   const cleanups: (() => void)[] = [];
-  let saveOnLeave: () => Promise<void> = async () => undefined;
+  let leave: () => Promise<boolean> = async () => true;
 
   return {
     name: 'paint',
@@ -50,7 +61,17 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       const surface: PaintSurface = createPaintSurface(area);
       const pctx = surface.paint.getContext('2d')!;
       const octx = surface.overlay.getContext('2d')!;
-      const history = createHistory<ImageData>(20);
+      const W = surface.paint.width;
+      const H = surface.paint.height;
+      // Kopie der Malebene vom Strichbeginn (GPU-Kopie statt getImageData der ganzen Fläche)
+      const base = document.createElement('canvas');
+      base.width = W;
+      base.height = H;
+      const bctx = base.getContext('2d', { willReadFrequently: true })!;
+      const history = createHistory<UndoEntry>(UNDO_MAX_STEPS, {
+        maxBytes: UNDO_MAX_BYTES,
+        sizeOf: (e) => e.data.data.length,
+      });
 
       // --- Zustand ---
       const tools = listTools();
@@ -81,7 +102,9 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         isBlank: () => surface.isBlank(),
         store: { createPicture, overwritePicture },
       });
+      let idleTimer = 0;
       const doSave = async () => {
+        clearTimeout(idleTimer);
         const r = await saver.save();
         if (r === 'error') {
           saveBtn.innerHTML = icons.saveError;
@@ -96,31 +119,26 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         return r;
       };
       saveBtn.onclick = () => void doSave();
-      saveOnLeave = async () => {
-        await doSave();
-      };
-      const onVisibility = () => {
-        if (document.visibilityState === 'hidden') void doSave();
-      };
-      document.addEventListener('visibilitychange', onVisibility);
-      cleanups.push(() => document.removeEventListener('visibilitychange', onVisibility));
 
       const updateUndo = () => undo.setAttribute('aria-disabled', String(!history.canUndo()));
       const changed = () => {
         updateUndo();
         saver.markDirty();
+        // Automatisch speichern, sobald eine kurze Pause entsteht (schützt bei Absturz/Beenden der App)
+        clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(() => void doSave(), IDLE_SAVE_MS);
       };
 
       home.onclick = () => navigate(modeMenuScreen(opts.profile));
       undo.onclick = () => {
-        const s = history.undo();
-        if (s) {
-          surface.restore(s);
+        const e = history.undo();
+        if (e) {
+          pctx.putImageData(e.data, e.rect.x, e.rect.y);
           changed();
         }
       };
       clear.onclick = () => {
-        history.push(surface.snapshot());
+        history.push({ rect: { x: 0, y: 0, w: W, h: H }, data: pctx.getImageData(0, 0, W, H) });
         surface.clear();
         changed();
       };
@@ -139,7 +157,8 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       custom.hidden = true;
       colorCol.append(rainbow, custom);
       const swatches: HTMLButtonElement[] = [];
-      const addSwatch = (c: string, el = document.createElement('button')) => {
+      const addSwatch = (c: string) => {
+        const el = document.createElement('button');
         el.classList.add('swatch');
         el.style.background = c;
         el.dataset.color = c;
@@ -223,8 +242,9 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       // --- Malen ---
       const route = createPointerRouter(() => zoom);
       let prevPts: [Pt, Pt] | null = null;
-      let drawing = false;
       let strokeCtx: ToolContext | null = null;
+      let bbox: Rect | null = null;
+      let pad = 0;
 
       const toCanvas = (x: number, y: number, e: PointerEvent): StrokePoint => {
         const c = screenToCanvas(surface.view(), x, y);
@@ -236,6 +256,41 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         };
       };
 
+      const startStroke = (p: StrokePoint) => {
+        bctx.clearRect(0, 0, W, H);
+        bctx.drawImage(surface.paint, 0, 0);
+        const useOverlay = tool.overlayAlpha !== undefined;
+        if (useOverlay) surface.overlay.style.opacity = String(tool.overlayAlpha);
+        strokeCtx = {
+          ctx: useOverlay ? octx : pctx,
+          color,
+          size: (sizes.get(tool.id) ?? tool.defaultSize) * surface.ratio,
+          variant: variants.get(tool.id) ?? null,
+        };
+        // Rand großzügig: weiche Pinselkante, Sprühradius, gedrehte Musterformen
+        pad = strokeCtx.size * 1.5 + 4;
+        bbox = tool.maxSize === 0 ? { x: 0, y: 0, w: W, h: H } : growRect(null, p.x, p.y, pad);
+        tool.begin(strokeCtx, p);
+      };
+
+      /** Beendet den laufenden Strich; abort = Strich verwerfen (Zwei-Finger-Geste). */
+      const finishStroke = (abort: boolean) => {
+        if (!strokeCtx) return;
+        tool.end(strokeCtx);
+        if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
+        strokeCtx = null;
+        const rect = bbox && clampRect(bbox, W, H);
+        bbox = null;
+        if (!rect) return;
+        if (abort) {
+          pctx.clearRect(rect.x, rect.y, rect.w, rect.h);
+          pctx.drawImage(base, rect.x, rect.y, rect.w, rect.h, rect.x, rect.y, rect.w, rect.h);
+        } else {
+          history.push({ rect, data: bctx.getImageData(rect.x, rect.y, rect.w, rect.h) });
+          changed();
+        }
+      };
+
       const handle = (kind: RouterEvent['kind'], e: PointerEvent) => {
         const r = surface.viewport.getBoundingClientRect();
         const x = e.clientX - r.left;
@@ -243,44 +298,25 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         const type = (e.pointerType || 'mouse') as RouterEvent['type'];
         const a = route({ kind, id: e.pointerId, type, x, y });
         switch (a.do) {
-          case 'strokeStart': {
-            history.push(surface.snapshot());
-            const useOverlay = tool.overlayAlpha !== undefined;
-            if (useOverlay) surface.overlay.style.opacity = String(tool.overlayAlpha);
-            strokeCtx = {
-              ctx: useOverlay ? octx : pctx,
-              color,
-              size: (sizes.get(tool.id) ?? tool.defaultSize) * surface.ratio,
-              variant: variants.get(tool.id) ?? null,
-            };
-            drawing = true;
-            tool.begin(strokeCtx, toCanvas(x, y, e));
+          case 'strokeStart':
+            startStroke(toCanvas(x, y, e));
             break;
-          }
           case 'strokeMove': {
-            if (!drawing || !strokeCtx) break;
+            if (!strokeCtx) break;
             const events = e.getCoalescedEvents?.() ?? [];
             for (const ce of events.length ? events : [e]) {
-              tool.move(strokeCtx, toCanvas(ce.clientX - r.left, ce.clientY - r.top, ce));
+              const p = toCanvas(ce.clientX - r.left, ce.clientY - r.top, ce);
+              if (bbox) bbox = growRect(bbox, p.x, p.y, pad);
+              tool.move(strokeCtx, p);
             }
             break;
           }
           case 'strokeEnd':
-          case 'strokeAbort': {
-            if (!drawing || !strokeCtx) break;
-            tool.end(strokeCtx);
-            if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
-            drawing = false;
-            strokeCtx = null;
-            if (a.do === 'strokeAbort') {
-              const s = history.undo();
-              if (s) surface.restore(s);
-              updateUndo();
-            } else {
-              changed();
-            }
+            finishStroke(false);
             break;
-          }
+          case 'strokeAbort':
+            finishStroke(true);
+            break;
           case 'gesture':
             if (prevPts) surface.setView(pinch(surface.view(), prevPts, a.points, surface.bounds));
             prevPts = a.points;
@@ -303,26 +339,41 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       vp.addEventListener('pointermove', onMove);
       vp.addEventListener('pointerup', onUp);
       vp.addEventListener('pointercancel', onCancel);
+
+      // In den Hintergrund / Seite wird verlassen: laufenden Strich abschließen und speichern
+      const saveNow = () => {
+        finishStroke(false);
+        void doSave();
+      };
+      const onVisibility = () => {
+        if (document.visibilityState === 'hidden') saveNow();
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+      window.addEventListener('pagehide', saveNow);
+
       cleanups.push(() => {
-        if (drawing && strokeCtx) {
-          // laufenden Strich sauber abschließen (z. B. Sprüh-Timer), damit er mitgespeichert wird
-          tool.end(strokeCtx);
-          if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
-          drawing = false;
-          changed();
-        }
+        clearTimeout(idleTimer);
+        document.removeEventListener('visibilitychange', onVisibility);
+        window.removeEventListener('pagehide', saveNow);
         vp.removeEventListener('pointerdown', onDown);
         vp.removeEventListener('pointermove', onMove);
         vp.removeEventListener('pointerup', onUp);
         vp.removeEventListener('pointercancel', onCancel);
       });
 
+      // Verlassen: speichern; schlägt das fehl, bleibt die Malfläche offen (nichts geht verloren)
+      leave = async () => {
+        finishStroke(false);
+        return (await doSave()) !== 'error';
+      };
+
       updateUndo();
       if (opts.picture) surface.loadImage(opts.picture.paint).catch((e) => console.error(e));
     },
     async unmount() {
+      if (!(await leave())) return false;
       cleanups.forEach((c) => c());
-      await saveOnLeave(); // Autosave beim Verlassen
+      return true;
     },
   };
 }

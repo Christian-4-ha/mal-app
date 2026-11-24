@@ -1,4 +1,5 @@
 import { IDENTITY, type View } from './view-transform';
+import { encodeCanvas } from './encode';
 
 export interface PaintSurface {
   /** Malebene in Leinwandpixeln. */
@@ -24,11 +25,6 @@ export interface PaintSurface {
 
 const THUMB_MAX_W = 320;
 
-function toBlob(c: HTMLCanvasElement, type = 'image/png', q?: number): Promise<Blob> {
-  return new Promise((resolve, reject) =>
-    c.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob fehlgeschlagen'))), type, q),
-  );
-}
 
 /** Leinwandgröße = Host-Größe × min(dpr, 2), bei Erstellung fest. */
 export function createPaintSurface(host: HTMLElement): PaintSurface {
@@ -96,7 +92,7 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
       bmp.close();
     },
     async toBlobs() {
-      const out = await toBlob(paint);
+      const out = encodeCanvas(paint);
       const k = Math.min(1, THUMB_MAX_W / paint.width);
       const t = document.createElement('canvas');
       t.width = Math.round(paint.width * k);
@@ -105,7 +101,7 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
       tctx.fillStyle = '#fff';
       tctx.fillRect(0, 0, t.width, t.height);
       tctx.drawImage(paint, 0, 0, t.width, t.height);
-      return { paint: out, thumb: await toBlob(t, 'image/jpeg', 0.8), width: paint.width, height: paint.height };
+      return { paint: out, thumb: encodeCanvas(t, 'image/jpeg', 0.8), width: paint.width, height: paint.height };
     },
   };
 }

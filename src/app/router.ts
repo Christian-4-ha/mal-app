@@ -2,19 +2,23 @@ import type { Screen } from './screen';
 
 let current: Screen | null = null;
 let root: HTMLElement | null = null;
-let chain: Promise<void> = Promise.resolve();
+let chain: Promise<unknown> = Promise.resolve();
 
 export function setRoot(el: HTMLElement): void {
   root = el;
+  current = null;
 }
 
-/** Wechselt den Bildschirm; wartet auf unmount des alten (z. B. Autosave). */
-export function navigate(screen: Screen): Promise<void> {
-  chain = chain.then(async () => {
+/**
+ * Wechselt den Bildschirm; wartet auf unmount des alten (z. B. Autosave).
+ * Liefert unmount `false`, bleibt der alte Bildschirm stehen und das Ergebnis ist `false`.
+ */
+export function navigate(screen: Screen): Promise<boolean> {
+  const next = chain.then(async () => {
     if (!root) throw new Error('Router ohne Wurzel');
     if (current) {
       try {
-        await current.unmount();
+        if ((await current.unmount()) === false) return false;
       } catch (e) {
         console.error(e);
       }
@@ -26,6 +30,8 @@ export function navigate(screen: Screen): Promise<void> {
     root.append(host);
     current = screen;
     screen.mount(host);
+    return true;
   });
-  return chain;
+  chain = next.catch(() => undefined);
+  return next;
 }

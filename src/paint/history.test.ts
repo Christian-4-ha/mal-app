@@ -21,6 +21,22 @@ describe('history', () => {
     h.clear();
     expect(h.canUndo()).toBe(false);
   });
+
+  it('begrenzt den Speicherbedarf: älteste Einträge fallen weg', () => {
+    const h = createHistory<{ bytes: number }>(20, { maxBytes: 100, sizeOf: (s) => s.bytes });
+    h.push({ bytes: 40 });
+    h.push({ bytes: 40 });
+    h.push({ bytes: 40 }); // 120 > 100 → erster fällt weg
+    expect(h.undo()).toBeDefined();
+    expect(h.undo()).toBeDefined();
+    expect(h.undo()).toBeUndefined();
+  });
+
+  it('behält mindestens den neuesten Eintrag, auch wenn er allein zu groß ist', () => {
+    const h = createHistory<{ bytes: number }>(20, { maxBytes: 100, sizeOf: (s) => s.bytes });
+    h.push({ bytes: 500 });
+    expect(h.canUndo()).toBe(true);
+  });
 });
 
 describe('sizeFromDrag', () => {
