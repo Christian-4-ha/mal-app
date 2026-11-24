@@ -13,6 +13,8 @@ import { IDENTITY, pinch, screenToCanvas, type Pt } from './view-transform';
 import { modeMenuScreen } from '../screens/mode-menu';
 import { openVariantPopup } from './variant-popup';
 import { openPalettePopup } from './palette-popup';
+import { createSaveController } from './save-controller';
+import { createPicture, overwritePicture } from '../storage/pictures';
 
 export interface PaintScreenOptions {
   profile: Profile;
@@ -31,6 +33,7 @@ function iconButton(icon: string, label: string, testid: string): HTMLButtonElem
 
 export function paintScreen(opts: PaintScreenOptions): Screen {
   const cleanups: (() => void)[] = [];
+  let saveOnLeave: () => Promise<void> = async () => undefined;
 
   return {
     name: 'paint',
@@ -63,14 +66,49 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       const home = iconButton(icons.home, 'Zurück', 'home');
       const undo = iconButton(icons.undo, 'Rückgängig', 'undo');
       const clear = iconButton(icons.clear, 'Leeren', 'clear');
+      const saveBtn = iconButton(icons.save, 'Speichern', 'save');
       const zoomBtn = iconButton(icons.zoom, 'Zoom', 'zoom');
-      bar.append(home, undo, clear, zoomBtn);
+      bar.append(home, undo, clear, saveBtn, zoomBtn);
       area.append(bar);
+
+      // --- Speichern ---
+      const saver = createSaveController({
+        profileId: opts.profile.id,
+        modeId: opts.modeId,
+        templateId: opts.picture?.templateId ?? null,
+        existing: opts.picture ?? null,
+        getBlobs: () => surface.toBlobs(),
+        isBlank: () => surface.isBlank(),
+        store: { createPicture, overwritePicture },
+      });
+      const doSave = async () => {
+        const r = await saver.save();
+        if (r === 'error') {
+          saveBtn.innerHTML = icons.saveError;
+          saveBtn.dataset.state = 'error';
+        } else if (r === 'saved') {
+          saveBtn.innerHTML = icons.save;
+          saveBtn.dataset.state = 'saved';
+          saveBtn.classList.remove('saved-anim');
+          void saveBtn.offsetWidth; // Animation neu starten
+          saveBtn.classList.add('saved-anim');
+        }
+        return r;
+      };
+      saveBtn.onclick = () => void doSave();
+      saveOnLeave = async () => {
+        await doSave();
+      };
+      const onVisibility = () => {
+        if (document.visibilityState === 'hidden') void doSave();
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+      cleanups.push(() => document.removeEventListener('visibilitychange', onVisibility));
 
       const updateUndo = () => undo.setAttribute('aria-disabled', String(!history.canUndo()));
       const changed = () => {
         updateUndo();
-        root.dispatchEvent(new CustomEvent('paint-change'));
+        saver.markDirty();
       };
 
       home.onclick = () => navigate(modeMenuScreen(opts.profile));
@@ -266,7 +304,13 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       vp.addEventListener('pointerup', onUp);
       vp.addEventListener('pointercancel', onCancel);
       cleanups.push(() => {
-        if (drawing && strokeCtx) tool.end(strokeCtx); // z. B. Sprüh-Timer stoppen
+        if (drawing && strokeCtx) {
+          // laufenden Strich sauber abschließen (z. B. Sprüh-Timer), damit er mitgespeichert wird
+          tool.end(strokeCtx);
+          if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
+          drawing = false;
+          changed();
+        }
         vp.removeEventListener('pointerdown', onDown);
         vp.removeEventListener('pointermove', onMove);
         vp.removeEventListener('pointerup', onUp);
@@ -276,8 +320,9 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       updateUndo();
       if (opts.picture) surface.loadImage(opts.picture.paint).catch((e) => console.error(e));
     },
-    unmount() {
+    async unmount() {
       cleanups.forEach((c) => c());
+      await saveOnLeave(); // Autosave beim Verlassen
     },
   };
 }

@@ -1,9 +1,13 @@
-import { db } from './db';
+import { db, type ProfileRecord } from './db';
+import { packBlob, unpackBlob } from './blob-store';
 import type { Profile } from './types';
+
+const fromRecord = (r: ProfileRecord): Profile => ({ ...r, avatar: r.avatar && unpackBlob(r.avatar) });
+const toRecord = async (p: Profile): Promise<ProfileRecord> => ({ ...p, avatar: p.avatar && (await packBlob(p.avatar)) });
 
 export async function listProfiles(): Promise<Profile[]> {
   const all = await (await db()).getAll('profiles');
-  return all.sort((a, b) => a.createdAt - b.createdAt);
+  return all.sort((a, b) => a.createdAt - b.createdAt).map(fromRecord);
 }
 
 let lastCreatedAt = 0;
@@ -19,10 +23,12 @@ export async function createProfile(name: string, avatar: Blob | null): Promise<
     warningsMin: [5, 1],
     createdAt: lastCreatedAt,
   };
-  await (await db()).put('profiles', profile);
+  const rec = await toRecord(profile);
+  await (await db()).put('profiles', rec);
   return profile;
 }
 
 export async function updateProfile(p: Profile): Promise<void> {
-  await (await db()).put('profiles', p);
+  const rec = await toRecord(p);
+  await (await db()).put('profiles', rec);
 }

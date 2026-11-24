@@ -1,14 +1,24 @@
-import { db } from './db';
+import { db, type PictureRecord, type TrashRecord } from './db';
+import { packBlob, unpackBlob } from './blob-store';
 import type { Picture, TrashEntry } from './types';
 
 const TRASH_KEEP_MS = 30 * 24 * 60 * 60 * 1000;
+
+function fromRecord(r: PictureRecord): Picture {
+  return { ...r, paint: unpackBlob(r.paint), thumb: unpackBlob(r.thumb) };
+}
+
+function fromTrash(r: TrashRecord): TrashEntry {
+  return { ...r, picture: fromRecord(r.picture) };
+}
 
 export async function createPicture(
   input: Omit<Picture, 'id' | 'createdAt' | 'updatedAt'>,
   now = Date.now(),
 ): Promise<Picture> {
   const pic: Picture = { ...input, id: crypto.randomUUID(), createdAt: now, updatedAt: now };
-  await (await db()).put('pictures', pic);
+  const rec: PictureRecord = { ...pic, paint: await packBlob(pic.paint), thumb: await packBlob(pic.thumb) };
+  await (await db()).put('pictures', rec);
   return pic;
 }
 
@@ -18,31 +28,35 @@ export async function overwritePicture(
   opts: { keepPrevious: boolean },
   now = Date.now(),
 ): Promise<Picture> {
+  // Erst packen: ein await außerhalb von IndexedDB würde die Transaktion vorzeitig beenden.
+  const paint = await packBlob(data.paint);
+  const thumb = await packBlob(data.thumb);
   const tx = (await db()).transaction(['pictures', 'trash'], 'readwrite');
   const old = await tx.objectStore('pictures').get(id);
   if (!old) throw new Error(`Bild ${id} nicht gefunden`);
-  const updated: Picture = { ...old, ...data, updatedAt: now };
+  const updated: PictureRecord = { ...old, paint, thumb, width: data.width, height: data.height, updatedAt: now };
   if (opts.keepPrevious) {
-    const entry: TrashEntry = { id: crypto.randomUUID(), picture: old, trashedAt: now, reason: 'overwritten' };
+    const entry: TrashRecord = { id: crypto.randomUUID(), picture: old, trashedAt: now, reason: 'overwritten' };
     await tx.objectStore('trash').put(entry);
   }
   await tx.objectStore('pictures').put(updated);
   await tx.done;
-  return updated;
+  return fromRecord(updated);
 }
 
 export async function listPictures(profileId: string): Promise<Picture[]> {
   const list = await (await db()).getAllFromIndex('pictures', 'byProfile', profileId);
-  return list.sort((a, b) => b.updatedAt - a.updatedAt);
+  return list.sort((a, b) => b.updatedAt - a.updatedAt).map(fromRecord);
 }
 
 export async function getPicture(id: string): Promise<Picture | undefined> {
-  return (await db()).get('pictures', id);
+  const r = await (await db()).get('pictures', id);
+  return r && fromRecord(r);
 }
 
 export async function listTrash(): Promise<TrashEntry[]> {
   const list = await (await db()).getAll('trash');
-  return list.sort((a, b) => b.trashedAt - a.trashedAt);
+  return list.sort((a, b) => b.trashedAt - a.trashedAt).map(fromTrash);
 }
 
 export async function purgeTrash(now = Date.now()): Promise<number> {

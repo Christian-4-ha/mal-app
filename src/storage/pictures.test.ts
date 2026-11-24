@@ -58,4 +58,14 @@ describe('pictures', () => {
   it('nutzt die gemeinsame Datenbank', async () => {
     expect(getDb()).toBeTruthy();
   });
+
+  it('legt Binärdaten als ArrayBuffer ab (WebKit kann keine Blobs in IndexedDB)', async () => {
+    const pic = await createPicture(sample('A'), 1000);
+    const raw = (await getDb()!.get('pictures', pic.id)) as unknown as { paint: unknown };
+    expect(raw.paint).not.toBeInstanceOf(Blob);
+    expect((raw.paint as { buf: unknown }).buf).toBeInstanceOf(ArrayBuffer);
+    const back = await getPicture(pic.id);
+    expect(back!.paint).toBeInstanceOf(Blob);
+    expect(await textOf(back!.paint)).toBe('A');
+  });
 });

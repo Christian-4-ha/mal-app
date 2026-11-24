@@ -1,10 +1,21 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { Picture, Profile, TrashEntry } from './types';
+import type { Picture, Profile } from './types';
+import type { StoredBlob } from './blob-store';
+
+// Gespeicherte Form: Blobs als StoredBlob
+export type ProfileRecord = Omit<Profile, 'avatar'> & { avatar: StoredBlob | null };
+export type PictureRecord = Omit<Picture, 'paint' | 'thumb'> & { paint: StoredBlob; thumb: StoredBlob };
+export interface TrashRecord {
+  id: string;
+  picture: PictureRecord;
+  trashedAt: number;
+  reason: 'overwritten' | 'deleted';
+}
 
 export interface MalDB extends DBSchema {
-  profiles: { key: string; value: Profile };
-  pictures: { key: string; value: Picture; indexes: { byProfile: string } };
-  trash: { key: string; value: TrashEntry };
+  profiles: { key: string; value: ProfileRecord };
+  pictures: { key: string; value: PictureRecord; indexes: { byProfile: string } };
+  trash: { key: string; value: TrashRecord };
   settings: { key: string; value: unknown };
 }
 
