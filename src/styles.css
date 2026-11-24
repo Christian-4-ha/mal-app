@@ -58,3 +58,18 @@ svg { display: block; width: 100%; height: 100%; }
 }
 .parent-form .primary { background: #7cb342; color: #fff; font-weight: 700; }
 .parent-form .primary:disabled { opacity: .4; }
+
+/* Modus-Menü */
+.mode-menu { display: flex; flex-direction: column; gap: 22px; padding: 20px 0 20px 28px; box-sizing: border-box; }
+.menu-top { display: flex; align-items: center; gap: 18px; }
+.tile-row {
+  display: flex; gap: 20px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+  touch-action: pan-x; scrollbar-width: none; padding: 6px 0 10px; flex: none;
+}
+.tile-row::-webkit-scrollbar { display: none; }
+.tile {
+  flex: none; width: var(--tile, 180px); height: var(--tile, 180px); scroll-snap-align: start;
+  border: none; border-radius: 28px; background: #fff; padding: 24px; box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+.tile:active { transform: scale(.96); }

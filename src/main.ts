@@ -1,4 +1,5 @@
 import './styles.css';
+import './modes';
 import { registerSW } from 'virtual:pwa-register';
 import { setRoot, navigate } from './app/router';
 import { purgeTrash } from './storage/pictures';
