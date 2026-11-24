@@ -1,5 +1,6 @@
 import { db, type ProfileRecord } from './db';
 import { packBlob, unpackBlob } from './blob-store';
+import { deletePicture, listPictures } from './pictures';
 import type { Profile } from './types';
 
 const fromRecord = (r: ProfileRecord): Profile => ({ ...r, avatar: r.avatar && unpackBlob(r.avatar) });
@@ -31,4 +32,10 @@ export async function createProfile(name: string, avatar: Blob | null): Promise<
 export async function updateProfile(p: Profile): Promise<void> {
   const rec = await toRecord(p);
   await (await db()).put('profiles', rec);
+}
+
+/** Löscht das Profil; seine Bilder wandern in den Papierkorb. */
+export async function deleteProfile(id: string): Promise<void> {
+  for (const pic of await listPictures(id)) await deletePicture(pic.id);
+  await (await db()).delete('profiles', id);
 }

@@ -71,3 +71,31 @@ export async function purgeTrash(now = Date.now()): Promise<number> {
   await tx.done;
   return removed;
 }
+
+/** Bild löschen = in den Papierkorb (30 Tage wiederherstellbar). */
+export async function deletePicture(id: string, now = Date.now()): Promise<void> {
+  const tx = (await db()).transaction(['pictures', 'trash'], 'readwrite');
+  const old = await tx.objectStore('pictures').get(id);
+  if (old) {
+    await tx.objectStore('trash').put({ id: crypto.randomUUID(), picture: old, trashedAt: now, reason: 'deleted' });
+    await tx.objectStore('pictures').delete(id);
+  }
+  await tx.done;
+}
+
+/** Holt einen Papierkorb-Eintrag zurück; existiert das Bild noch (überschrieben), als Kopie. */
+export async function restoreFromTrash(entryId: string, now = Date.now()): Promise<void> {
+  const tx = (await db()).transaction(['pictures', 'trash'], 'readwrite');
+  const entry = await tx.objectStore('trash').get(entryId);
+  if (entry) {
+    const exists = await tx.objectStore('pictures').get(entry.picture.id);
+    const pic = exists ? { ...entry.picture, id: crypto.randomUUID(), updatedAt: now } : entry.picture;
+    await tx.objectStore('pictures').put(pic);
+    await tx.objectStore('trash').delete(entryId);
+  }
+  await tx.done;
+}
+
+export async function deleteTrashEntry(entryId: string): Promise<void> {
+  await (await db()).delete('trash', entryId);
+}
