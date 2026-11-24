@@ -8,3 +8,6 @@ navigator.storage?.persist?.().catch(() => undefined);
 
 const root = document.getElementById('app')!;
 root.innerHTML = '<div data-screen="boot"></div>';
+
+import { purgeTrash } from './storage/pictures';
+purgeTrash().catch(() => undefined);
