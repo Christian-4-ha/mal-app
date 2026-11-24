@@ -109,3 +109,10 @@ svg { display: block; width: 100%; height: 100%; }
 .variant-popup { position: absolute; display: flex; flex-direction: column; gap: 10px; padding: 10px; background: #fff; border-radius: 22px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
 .variant-btn { width: 72px; height: 72px; border: none; border-radius: 18px; background: #f5f5f5; padding: 8px; }
 .variant-btn.active { background: #ffe082; box-shadow: 0 0 0 3px #ffb300; }
+
+/* Regenbogen-Palette */
+.palette-backdrop { background: rgba(0,0,0,.25); display: flex; align-items: center; justify-content: center; }
+.palette-popup { display: grid; grid-template-columns: repeat(11, var(--cell)); gap: 6px; padding: 14px; background: #fff; border-radius: 24px; box-shadow: 0 8px 28px rgba(0,0,0,.3); }
+.palette-cell { width: var(--cell); height: var(--cell); border-radius: 50%; border: 2px solid rgba(0,0,0,.08); padding: 0; }
+.palette-cell.active { box-shadow: 0 0 0 4px #3e2723; }
+.palette-cell:active { transform: scale(.9); }

@@ -12,6 +12,7 @@ import { createSizeControl } from './size-control';
 import { IDENTITY, pinch, screenToCanvas, type Pt } from './view-transform';
 import { modeMenuScreen } from '../screens/mode-menu';
 import { openVariantPopup } from './variant-popup';
+import { openPalettePopup } from './palette-popup';
 
 export interface PaintScreenOptions {
   profile: Profile;
@@ -109,6 +110,16 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         return el;
       };
       for (const c of BASIC_COLORS) colorCol.append(addSwatch(c));
+      // Zuletzt frei gewählte Farbe (nur in diesem Malbildschirm)
+      rainbow.onclick = () =>
+        openPalettePopup(color, (c) => {
+          custom.hidden = false;
+          custom.style.background = c;
+          custom.dataset.color = c;
+          custom.onclick = () => selectColor(c);
+          if (!swatches.includes(custom)) swatches.push(custom);
+          selectColor(c);
+        });
       const sizeCtl = createSizeControl((s) => {
         sizes.set(tool.id, s);
       });

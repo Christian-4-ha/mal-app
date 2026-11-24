@@ -59,3 +59,19 @@ test('Eimer füllt die Fläche', async ({ page }) => {
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   expect(await centerAlpha(page)).toBe(255);
 });
+
+test('Regenbogen öffnet Palette, gewählte Farbe erscheint als eigener Tupfer', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  await expect(page.getByTestId('custom-color')).toBeHidden();
+  await page.getByTestId('rainbow').click();
+  const cells = page.getByTestId('palette').locator('.palette-cell');
+  await expect(cells).toHaveCount(110);
+  const picked = await cells.nth(25).getAttribute('data-color');
+  await cells.nth(25).click();
+  await expect(page.getByTestId('palette')).toBeHidden();
+  const custom = page.getByTestId('custom-color');
+  await expect(custom).toBeVisible();
+  await expect(custom).toHaveAttribute('data-color', picked!);
+  await expect(custom).toHaveClass(/active/);
+});
