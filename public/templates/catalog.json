@@ -1,23 +1,106 @@
 {
   "themes": [
-    { "id": "tiere" },
-    { "id": "fahrzeuge" },
-    { "id": "dinos" },
-    { "id": "fabelwesen" },
-    { "id": "meer" }
+    {
+      "id": "fabelwesen"
+    },
+    {
+      "id": "tiere"
+    },
+    {
+      "id": "fahrzeuge"
+    },
+    {
+      "id": "dinos"
+    },
+    {
+      "id": "meer"
+    }
   ],
   "templates": [
-    { "id": "katze", "theme": "tiere", "file": "tiere/katze.svg" },
-    { "id": "hund", "theme": "tiere", "file": "tiere/hund.svg" },
-    { "id": "hase", "theme": "tiere", "file": "tiere/hase.svg" },
-    { "id": "elefant", "theme": "tiere", "file": "tiere/elefant.svg" },
-    { "id": "loewe", "theme": "tiere", "file": "tiere/loewe.svg" },
-    { "id": "schildkroete", "theme": "tiere", "file": "tiere/schildkroete.svg" },
-    { "id": "eule", "theme": "tiere", "file": "tiere/eule.svg" },
-    { "id": "schwein", "theme": "tiere", "file": "tiere/schwein.svg" },
-    { "id": "auto", "theme": "fahrzeuge", "file": "fahrzeuge/auto.svg" },
-    { "id": "langhals", "theme": "dinos", "file": "dinos/langhals.svg" },
-    { "id": "einhorn", "theme": "fabelwesen", "file": "fabelwesen/einhorn.svg" },
-    { "id": "fisch", "theme": "meer", "file": "meer/fisch.svg" }
+    {
+      "id": "katze",
+      "theme": "tiere",
+      "file": "tiere/katze.svg"
+    },
+    {
+      "id": "hund",
+      "theme": "tiere",
+      "file": "tiere/hund.svg"
+    },
+    {
+      "id": "hase",
+      "theme": "tiere",
+      "file": "tiere/hase.svg"
+    },
+    {
+      "id": "elefant",
+      "theme": "tiere",
+      "file": "tiere/elefant.svg"
+    },
+    {
+      "id": "loewe",
+      "theme": "tiere",
+      "file": "tiere/loewe.svg"
+    },
+    {
+      "id": "schildkroete",
+      "theme": "tiere",
+      "file": "tiere/schildkroete.svg"
+    },
+    {
+      "id": "eule",
+      "theme": "tiere",
+      "file": "tiere/eule.svg"
+    },
+    {
+      "id": "schwein",
+      "theme": "tiere",
+      "file": "tiere/schwein.svg"
+    },
+    {
+      "id": "auto",
+      "theme": "fahrzeuge",
+      "file": "fahrzeuge/auto.svg"
+    },
+    {
+      "id": "langhals",
+      "theme": "dinos",
+      "file": "dinos/langhals.svg"
+    },
+    {
+      "id": "fisch",
+      "theme": "meer",
+      "file": "meer/fisch.svg"
+    },
+    {
+      "id": "fw-einhorn",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/einhorn.svg"
+    },
+    {
+      "id": "fw-fee",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/fee.svg"
+    },
+    {
+      "id": "fw-meerjungfrau",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/meerjungfrau.svg"
+    },
+    {
+      "id": "fw-babydrache",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/babydrache.svg"
+    },
+    {
+      "id": "fw-pegasus",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/pegasus.svg"
+    },
+    {
+      "id": "fw-drachenvogel",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/drachenvogel.svg"
+    }
   ]
 }
