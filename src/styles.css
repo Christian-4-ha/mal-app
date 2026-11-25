@@ -216,3 +216,54 @@ svg { display: block; width: 100%; height: 100%; }
 .kind-row .active, .time-toggle[data-on] { outline: none; }
 .kind-row button.active { background: #ffca28; border-color: #5d4037; font-weight: 700; }
 .menu-top .time-toggle { margin-left: auto; }
+
+/* --- Spiele --- */
+.game-screen { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; justify-items: center; background: #e8f5e9; }
+.game-home { position: absolute; top: 16px; left: 16px; z-index: 5; }
+.player-badge { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px; border-radius: 28px; transition: transform .2s, box-shadow .2s; opacity: .55; }
+.player-badge .avatar { width: 120px; height: 120px; font-size: 54px; }
+.player-badge.turn { opacity: 1; transform: scale(1.08); box-shadow: 0 0 0 6px var(--pc); background: #fff; }
+.player-stone { width: 44px; height: 44px; border-radius: 50%; background: var(--pc); box-shadow: inset 0 -4px 0 rgba(0,0,0,.2); }
+.player-info { display: flex; flex-wrap: wrap; gap: 4px; max-width: 120px; justify-content: center; }
+.player-info i { width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 -2px 0 rgba(0,0,0,.25); }
+.guest-avatar { background: #eceff1; padding: 14px; box-sizing: border-box; }
+.board-tictactoe { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(64vh, 52vw); height: min(64vh, 52vw); background: #5d4037; padding: 10px; border-radius: 18px; }
+.ttt-cell { border: none; background: #fff; border-radius: 12px; padding: 10%; }
+.ttt-cell.win { background: #fff59d; }
+.board-connect4 { display: flex; gap: 6px; background: #1e88e5; padding: 12px; border-radius: 20px; height: min(76vh, 46vw); aspect-ratio: 7 / 6; box-sizing: border-box; }
+.c4-col { flex: 1; display: flex; flex-direction: column; gap: 6px; border: none; background: none; padding: 0; border-radius: 12px; }
+.c4-col:active { background: rgba(255,255,255,.15); }
+.c4-hole { flex: 1; border-radius: 50%; background: #e3f2fd; position: relative; overflow: visible; }
+.c4-stone { position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 -5px 0 rgba(0,0,0,.2); animation: c4-drop calc(.08s * var(--drop)) ease-in; }
+.c4-hole.win .c4-stone { box-shadow: 0 0 0 5px #fff, inset 0 -5px 0 rgba(0,0,0,.2); }
+@keyframes c4-drop { from { transform: translateY(calc(-110% * var(--drop))); } }
+.board-muehle { width: min(80vh, 54vw); height: min(80vh, 54vw); background: #ffe0b2; border-radius: 20px; padding: 8px; box-sizing: border-box; }
+.mill-lines { fill: none; stroke: #5d4037; stroke-width: .08; }
+.mill-hit { fill: transparent; }
+.mill-pt { cursor: pointer; }
+.mill-stone { stroke: rgba(0,0,0,.35); stroke-width: .05; }
+.mill-pt[data-p=""] .mill-stone { stroke: none; }
+.mill-pt.selected .mill-stone { stroke: #1e88e5; stroke-width: .12; }
+.mill-pt.removable .mill-stone { animation: blink .8s infinite; stroke: #212121; stroke-width: .1; }
+@keyframes blink { 50% { opacity: .45; } }
+.game-over { position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; gap: 40px; background: rgba(255,255,255,.82); overflow: hidden; }
+.game-over .winner { display: flex; gap: 20px; }
+.game-over .winner .avatar { width: 180px; height: 180px; font-size: 80px; }
+.icon-btn.big { width: 120px; height: 120px; padding: 20px; }
+.confetti { position: absolute; top: -20px; width: 14px; height: 20px; border-radius: 3px; animation: fall 2.4s linear forwards; pointer-events: none; }
+@keyframes fall { to { top: 110%; transform: rotate(720deg); } }
+.player-select { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; background: #e8f5e9; }
+.versus-head { display: flex; align-items: center; gap: 30px; }
+.versus-icon { width: 110px; height: 110px; }
+
+/* --- Puzzle --- */
+.puzzle-screen { background: #efebe9; }
+.puzzle-table { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.count-pick { position: absolute; inset: 0; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 22px; padding: 100px 60px; }
+.count-pick .tile { width: 150px; height: 150px; padding: 14px; }
+.puzzle-board { position: absolute; background: #fff; border-radius: 6px; box-shadow: 0 0 0 4px #bcaaa4; }
+.puzzle-ghost { width: 100%; height: 100%; opacity: .22; display: block; }
+.puzzle-piece { position: absolute; left: 0; top: 0; pointer-events: none; filter: drop-shadow(0 3px 3px rgba(0,0,0,.3)); will-change: transform; }
+.puzzle-piece.dragging { filter: drop-shadow(0 8px 8px rgba(0,0,0,.35)); }
+.puzzle-piece.placed { filter: none; }
+.done-check { width: 160px; height: 160px; }

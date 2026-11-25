@@ -1,0 +1,10 @@
+{
+  "images": [
+    { "id": "fw-einhorn", "template": "fw-einhorn" },
+    { "id": "fw-fee", "template": "fw-fee" },
+    { "id": "fw-meerjungfrau", "template": "fw-meerjungfrau" },
+    { "id": "fw-babydrache", "template": "fw-babydrache" },
+    { "id": "fw-pegasus", "template": "fw-pegasus" },
+    { "id": "fw-drachenvogel", "template": "fw-drachenvogel" }
+  ]
+}

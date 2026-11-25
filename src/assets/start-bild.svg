@@ -7,7 +7,7 @@
   </defs>
   <rect width="1600" height="1000" fill="url(#sky)"/>
   <!-- Sonne -->
-  <g transform="translate(1440 130)">
+  <g transform="translate(1250 140)">
     <circle r="70" fill="#ffeb3b" stroke="#fbc02d" stroke-width="6"/>
     <g stroke="#fbc02d" stroke-width="10" stroke-linecap="round">
       <path d="M0 -95 V-125 M0 95 V125 M-95 0 H-125 M95 0 H125 M67 67 L88 88 M-67 -67 L-88 -88 M67 -67 L88 -88 M-67 67 L-88 88"/>
