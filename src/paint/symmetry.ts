@@ -57,3 +57,10 @@ export function mandalaAxes(modeId: string): number {
   const m = /^mandala-([1-5])$/.exec(modeId);
   return m ? Number(m[1]) : 0;
 }
+
+/** Umkehrmatrix einer affinen Abbildung. */
+export function invertMat(m: Mat): Mat {
+  const [a, b, c, d, e, f] = m;
+  const det = a * d - b * c;
+  return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det];
+}

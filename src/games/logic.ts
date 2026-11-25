@@ -83,7 +83,12 @@ export interface MillState {
   /** remove: der Spieler am Zug hat eine Mühle und nimmt einen Stein. */
   phase: 'place' | 'move' | 'remove';
   winner: P | null;
+  /** Züge ohne Mühle in Folge; ab MILL_DRAW_MOVES endet das Spiel unentschieden. */
+  quiet?: number;
+  draw?: boolean;
 }
+
+export const MILL_DRAW_MOVES = 40;
 
 export function millStart(first: P = 0): MillState {
   return { board: Array(24).fill(null), toPlace: [9, 9], turn: first, phase: 'place', winner: null };
@@ -137,11 +142,14 @@ export function millPlace(s: MillState, i: number): MillState | null {
 }
 
 export function millMove(s: MillState, from: number, to: number): MillState | null {
-  if (s.winner !== null || !millCanMove(s, from, to)) return null;
+  if (s.winner !== null || s.draw || !millCanMove(s, from, to)) return null;
   const board = [...s.board];
   board[to] = board[from];
   board[from] = null;
-  return afterLanding({ ...s, board }, to);
+  const n = afterLanding({ ...s, board }, to);
+  if (n.phase === 'remove') return { ...n, quiet: 0 };
+  const quiet = (s.quiet ?? 0) + 1;
+  return { ...n, quiet, draw: n.winner === null && quiet >= MILL_DRAW_MOVES };
 }
 
 export function millRemove(s: MillState, i: number): MillState | null {

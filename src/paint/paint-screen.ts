@@ -21,7 +21,7 @@ import { showSaveToast } from './save-toast';
 import { getTemplateSource } from '../templates';
 import { svgToImage } from '../templates/svg-image';
 import { startTimeLimit } from '../quota/time-limit';
-import { applyMat, mandalaAxes, matBounds, symmetryMatrices, unionRect } from './symmetry';
+import { applyMat, invertMat, mandalaAxes, matBounds, symmetryMatrices, unionRect } from './symmetry';
 import { dayOverScreen } from '../screens/day-over';
 
 export interface PaintScreenOptions {
@@ -88,7 +88,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       if (scratch) {
         scratch.width = W;
         scratch.height = H;
-        drawGuides(surface.guides, axes);
+        drawGuides(surface.addGuides(), axes);
       }
       const sctx = scratch?.getContext('2d') ?? null;
       let dirty: Rect | null = null;
@@ -284,10 +284,17 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         };
       };
 
+      // Werkzeug des laufenden Strichs (ein Werkzeugwechsel mitten im Strich ändert ihn nicht)
+      let strokeTool: Tool = tool;
+      // Mandala: Bereich der Hilfsebene, der sich seit dem letzten Bild geändert hat
+      let seg: Rect | null = null;
+      let lastPt: StrokePoint | null = null;
+
       const startStroke = (p: StrokePoint) => {
+        strokeTool = tool;
         bctx.clearRect(0, 0, W, H);
         bctx.drawImage(surface.paint, 0, 0);
-        const useOverlay = tool.overlayAlpha !== undefined;
+        const useOverlay = tool.overlayAlpha !== undefined && !mirrors;
         if (useOverlay) surface.overlay.style.opacity = String(tool.overlayAlpha);
         strokeCtx = {
           ctx: useOverlay ? octx : pctx,
@@ -300,8 +307,9 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         pad = strokeCtx.size * 1.5 + 4;
         bbox = tool.maxSize === 0 ? { x: 0, y: 0, w: W, h: H } : growRect(null, p.x, p.y, pad);
         if (mirrors && tool.maxSize === 0) {
-          // Eimer: an allen gespiegelten Punkten füllen
-          for (const m of mirrors) tool.begin(strokeCtx, { ...p, ...applyMat(m, p.x, p.y) });
+          // Eimer: alle gespiegelten Punkte in einem Durchgang füllen
+          strokeCtx.points = mirrors.map((m) => applyMat(m, p.x, p.y));
+          tool.begin(strokeCtx, p);
           return;
         }
         if (mirrors && sctx) {
@@ -309,6 +317,8 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
           strokeCtx.ctx = sctx;
           strokeCtx.maskOnly = tool.id === 'eraser';
           dirty = null;
+          lastPt = p;
+          seg = growRect(null, p.x, p.y, pad);
           tool.begin(strokeCtx, p);
           scheduleCompose();
           return;
@@ -316,37 +326,52 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         tool.begin(strokeCtx, p);
       };
 
-      /** Mandala: Malebene im betroffenen Bereich = Stand vom Strichbeginn + alle Spiegelkopien. */
-      const compose = () => {
-        cancelAnimationFrame(frame);
-        frame = 0;
-        if (!mirrors || !scratch || !bbox) return;
-        const src = clampRect(bbox, W, H);
-        if (!src) return;
-        for (const m of mirrors) dirty = unionRect(dirty, matBounds(m, src));
-        const d = clampRect(dirty!, W, H);
-        if (!d) return;
-        pctx.clearRect(d.x, d.y, d.w, d.h);
-        pctx.drawImage(base, d.x, d.y, d.w, d.h, d.x, d.y, d.w, d.h);
+      /** Baut einen Bereich der Malebene neu auf: Stand vom Strichbeginn + alle Spiegelkopien. */
+      const recompose = (R: Rect) => {
+        if (!mirrors || !scratch) return;
+        pctx.clearRect(R.x, R.y, R.w, R.h);
+        pctx.drawImage(base, R.x, R.y, R.w, R.h, R.x, R.y, R.w, R.h);
         pctx.save();
-        pctx.globalAlpha = tool.overlayAlpha ?? 1;
-        pctx.globalCompositeOperation = tool.id === 'eraser' ? 'destination-out' : 'source-over';
+        pctx.beginPath();
+        pctx.rect(R.x, R.y, R.w, R.h);
+        pctx.clip();
+        pctx.globalAlpha = strokeTool.overlayAlpha ?? 1;
+        pctx.globalCompositeOperation = strokeTool.id === 'eraser' ? 'destination-out' : 'source-over';
         for (const m of mirrors) {
+          // nur der Teil der Hilfsebene, der in R landet
+          const src = clampRect(matBounds(invertMat(m), R), W, H);
+          if (!src) continue;
           pctx.setTransform(...m);
           pctx.drawImage(scratch, src.x, src.y, src.w, src.h, src.x, src.y, src.w, src.h);
         }
         pctx.restore();
       };
+
+      /** Mandala: nur die seit dem letzten Bild geänderten Bereiche (bzw. alles bei full) neu aufbauen. */
+      const compose = (full = false) => {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        if (!mirrors || !bbox) return;
+        const src = clampRect(full ? bbox : seg ?? bbox, W, H);
+        seg = lastPt ? growRect(null, lastPt.x, lastPt.y, pad) : null;
+        if (!src) return;
+        const regions = mirrors.map((m) => clampRect(matBounds(m, src), W, H)).filter((r): r is Rect => !!r);
+        for (const R of regions) {
+          dirty = unionRect(dirty, R);
+          recompose(R);
+        }
+      };
       const scheduleCompose = () => {
-        if (!frame) frame = requestAnimationFrame(compose);
+        if (!frame) frame = requestAnimationFrame(() => compose());
       };
 
       /** Beendet den laufenden Strich; abort = Strich verwerfen (Zwei-Finger-Geste). */
       const finishStroke = (abort: boolean) => {
         if (!strokeCtx) return;
+        const tool = strokeTool;
         tool.end(strokeCtx);
         const mandalaStroke = strokeCtx.ctx === sctx;
-        if (mandalaStroke) compose();
+        if (mandalaStroke) compose(true);
         else if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
         strokeCtx = null;
         const rect = mandalaStroke ? dirty && clampRect(dirty, W, H) : bbox && clampRect(bbox, W, H);
@@ -379,7 +404,11 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
             for (const ce of events.length ? events : [e]) {
               const p = toCanvas(ce.clientX - r.left, ce.clientY - r.top, ce);
               if (bbox) bbox = growRect(bbox, p.x, p.y, pad);
-              tool.move(strokeCtx, p);
+              if (strokeCtx.ctx === sctx) {
+                seg = growRect(seg, p.x, p.y, pad);
+                lastPt = p;
+              }
+              strokeTool.move(strokeCtx, p);
             }
             if (strokeCtx.ctx === sctx) scheduleCompose();
             break;
@@ -425,6 +454,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       window.addEventListener('pagehide', saveNow);
 
       cleanups.push(() => {
+        cancelAnimationFrame(frame);
         clearTimeout(idleTimer);
         document.removeEventListener('visibilitychange', onVisibility);
         window.removeEventListener('pagehide', saveNow);

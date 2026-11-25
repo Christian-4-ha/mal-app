@@ -9,6 +9,8 @@ export interface TemplateInfo {
   theme: string;
   /** Pfad relativ zu templates/ */
   file: string;
+  /** Nur für alte gespeicherte Bilder: nicht in der Auswahl zeigen. */
+  hidden?: boolean;
 }
 
 /** Austauschbare Quelle für Ausmal-Vorlagen (heute: Katalog; später z. B. Online-Generator). */

@@ -101,6 +101,12 @@
       "id": "fw-drachenvogel",
       "theme": "fabelwesen",
       "file": "fabelwesen/drachenvogel.svg"
+    },
+    {
+      "id": "einhorn",
+      "theme": "fabelwesen",
+      "file": "fabelwesen/einhorn-alt.svg",
+      "hidden": true
     }
   ]
 }

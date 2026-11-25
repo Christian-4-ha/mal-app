@@ -150,7 +150,7 @@ export const muehle: Game = {
     };
 
     const tap = (i: number) => {
-      if (s.winner !== null) return;
+      if (s.winner !== null || s.draw) return;
       let next: MillState | null = null;
       if (s.phase === 'place') next = millPlace(s, i);
       else if (s.phase === 'remove') next = millRemove(s, i);
@@ -165,6 +165,7 @@ export const muehle: Game = {
       selected = null;
       render();
       if (s.winner !== null) api.finish(s.winner);
+      else if (s.draw) api.finish(null);
     };
     render();
     return () => {};

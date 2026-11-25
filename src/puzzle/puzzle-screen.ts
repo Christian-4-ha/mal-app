@@ -57,6 +57,7 @@ export function puzzleScreen(profile: Profile, motif: Motif): Screen {
         (e) => console.error('Puzzlebild', e),
       );
 
+      let pending = false;
       const chooseCount = () => {
         table.replaceChildren();
         root.dataset.state = 'choose';
@@ -65,8 +66,11 @@ export function puzzleScreen(profile: Profile, motif: Motif): Screen {
         for (const pc of PIECE_COUNTS) {
           const b = button(countIcon(pc.cols, pc.rows, pc.count), `${pc.count} Teile`, `pieces-${pc.count}`, 'tile');
           b.onclick = async () => {
+            if (pending) return; // doppeltes Tippen baut nicht zweimal
+            pending = true;
             await imageReady;
-            if (image && root.isConnected) build(pc.cols, pc.rows);
+            pending = false;
+            if (image && root.isConnected && root.dataset.state === 'choose') build(pc.cols, pc.rows);
           };
           pick.append(b);
         }
@@ -74,6 +78,7 @@ export function puzzleScreen(profile: Profile, motif: Motif): Screen {
       };
 
       const build = (cols: number, rows: number) => {
+        cleanupPlay();
         table.replaceChildren();
         root.dataset.state = 'play';
         const img = image!;
@@ -200,6 +205,9 @@ export function puzzleScreen(profile: Profile, motif: Motif): Screen {
             p.el.classList.add('placed');
             p.el.style.zIndex = '1';
             if (pieces.every((q) => q.placed)) done();
+          } else if (p.x + m < 100 && p.y + m < 100) {
+            // nicht unter dem Zurück-Knopf liegen lassen
+            move(p, p.x, 100 - m);
           }
         };
         table.addEventListener('pointerdown', onDown);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  c4Drop, c4Line, millCanMove, millMove, millPlace, millRemovable, millRemove, millStart, tttWinner,
+  c4Drop, c4Line, millCanMove, millMove, millPlace, millRemovable, millRemove, millStart, tttWinner, MILL_DRAW_MOVES,
   type Cell, type MillState,
 } from './logic';
 
@@ -107,5 +107,23 @@ describe('Mühle', () => {
     blocked.toPlace = [0, 1];
     const r2 = millPlace(blocked, 12)!;
     expect(r2.winner).toBe(1);
+  });
+});
+
+describe('Mühle unentschieden', () => {
+  it('endet nach vielen Zügen ohne Mühle', () => {
+    let s: MillState = { board: Array(24).fill(null), toPlace: [0, 0], turn: 0, phase: 'move', winner: null };
+    s.board[0] = 0; s.board[4] = 0; s.board[8] = 0;
+    s.board[21] = 1; s.board[19] = 1; s.board[23] = 1;
+    // beide springen hin und her, ohne Mühle
+    const hops: [number, number][][] = [[[0, 2], [21, 18]], [[2, 0], [18, 21]]];
+    for (let i = 0; i < MILL_DRAW_MOVES / 2; i++) {
+      const [[a, b], [c, d]] = hops[i % 2];
+      s = millMove(s, a, b)!;
+      expect(s.draw).toBe(i * 2 + 1 >= MILL_DRAW_MOVES);
+      s = millMove(s, c, d)!;
+    }
+    expect(s.draw).toBe(true);
+    expect(millMove(s, 0, 2)).toBeNull();
   });
 });

@@ -28,7 +28,10 @@ export function createBucket(): Tool {
         return;
       }
       const img = c.ctx.getImageData(0, 0, width, height);
-      if (floodFill(img, p.x, p.y, hexToRgba(c.color)) > 0) c.ctx.putImageData(img, 0, 0);
+      let filled = 0;
+      // ein Lese- und Schreibvorgang für alle (gespiegelten) Punkte
+      for (const q of c.points ?? [p]) filled += floodFill(img, q.x, q.y, hexToRgba(c.color));
+      if (filled > 0) c.ctx.putImageData(img, 0, 0);
     },
     move() {},
     end() {},

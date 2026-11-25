@@ -42,3 +42,13 @@ describe('mandalaAxes', () => {
     expect(mandalaAxes('mandala-9')).toBe(0);
   });
 });
+
+describe('invertMat', () => {
+  it('hebt jede Spiegelmatrix auf', async () => {
+    const { invertMat } = await import('./symmetry');
+    for (const m of symmetryMatrices(3, 400, 300)) {
+      const p = applyMat(m, 123, 45);
+      close(applyMat(invertMat(m), p.x, p.y), { x: 123, y: 45 });
+    }
+  });
+});

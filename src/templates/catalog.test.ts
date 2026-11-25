@@ -34,3 +34,17 @@ describe('parseCatalog', () => {
     expect(parseCatalog({ themes: 'x' }).templates).toEqual([]);
   });
 });
+
+describe('versteckte Vorlagen', () => {
+  it('bleiben ladbar, erscheinen aber nicht als Themen-Symbol', () => {
+    const c = parseCatalog({
+      themes: [{ id: 'a' }],
+      templates: [
+        { id: 'alt', theme: 'a', file: 'a/alt.svg', hidden: true },
+        { id: 'neu', theme: 'a', file: 'a/neu.svg' },
+      ],
+    });
+    expect(c.templates.find((x) => x.id === 'alt')?.hidden).toBe(true);
+    expect(c.themes[0].icon).toBe('a/neu.svg');
+  });
+});

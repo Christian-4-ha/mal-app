@@ -19,11 +19,11 @@ export function parseCatalog(json: unknown): Catalog {
     if (!isObj(t) || typeof t.id !== 'string' || typeof t.theme !== 'string' || typeof t.file !== 'string') continue;
     if (seen.has(t.id) || !themeIds.includes(t.theme) || !SAFE_FILE.test(t.file)) continue;
     seen.add(t.id);
-    templates.push({ id: t.id, theme: t.theme, file: t.file });
+    templates.push({ id: t.id, theme: t.theme, file: t.file, ...(t.hidden === true ? { hidden: true } : {}) });
   }
   const themes: Theme[] = [];
   for (const id of themeIds) {
-    const first = templates.find((t) => t.theme === id);
+    const first = templates.find((t) => t.theme === id && !t.hidden);
     if (first) themes.push({ id, icon: first.file });
   }
   return { themes, templates };
@@ -47,7 +47,7 @@ function load(): Promise<Catalog> {
 export const catalogSource: TemplateSource = {
   id: 'catalog',
   listThemes: async () => (await load()).themes,
-  listTemplates: async (themeId) => (await load()).templates.filter((t) => t.theme === themeId),
+  listTemplates: async (themeId) => (await load()).templates.filter((t) => t.theme === themeId && !t.hidden),
   previewUrl: (t) => base() + ('file' in t ? t.file : t.icon),
   async loadSvg(templateId) {
     const t = (await load()).templates.find((x) => x.id === templateId);

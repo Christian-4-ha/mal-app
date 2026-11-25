@@ -263,7 +263,7 @@ svg { display: block; width: 100%; height: 100%; }
 .count-pick .tile { width: 150px; height: 150px; padding: 14px; }
 .puzzle-board { position: absolute; background: #fff; border-radius: 6px; box-shadow: 0 0 0 4px #bcaaa4; }
 .puzzle-ghost { width: 100%; height: 100%; opacity: .22; display: block; }
-.puzzle-piece { position: absolute; left: 0; top: 0; pointer-events: none; filter: drop-shadow(0 3px 3px rgba(0,0,0,.3)); will-change: transform; }
+.puzzle-piece { position: absolute; left: 0; top: 0; pointer-events: none; }
 .puzzle-piece.dragging { filter: drop-shadow(0 8px 8px rgba(0,0,0,.35)); }
-.puzzle-piece.placed { filter: none; }
+.puzzle-screen .game-home { z-index: 1000000; }
 .done-check { width: 160px; height: 160px; }
