@@ -13,9 +13,9 @@ export function pinSetupScreen(): Screen {
     mount(root) {
       root.classList.add('parent-form');
       root.innerHTML = `
-        <h1>Willkommen bei der Mal-App</h1>
+        <h1>Willkommen bei Taino</h1>
         <p class="hint">Für Eltern: Bitte zuerst eine 4-stellige Eltern-PIN festlegen.<br>
-        Sie schützt das Anlegen von Profilen, die Malzeit und den Elternbereich.</p>
+        Sie schützt das Anlegen von Profilen, die Nutzungszeit und den Elternbereich.</p>
         <button class="primary" data-testid="pin-setup-start">PIN festlegen</button>`;
       root.querySelector<HTMLButtonElement>('[data-testid="pin-setup-start"]')!.onclick = async () => {
         if (await setupPin()) navigate(profileSelectScreen());

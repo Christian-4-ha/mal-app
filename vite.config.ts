@@ -10,8 +10,8 @@ export default defineConfig({
       pwaAssets: { config: true },
       workbox: { globPatterns: ['**/*.{js,css,html,svg,png,json}'] },
       manifest: {
-        name: 'Malen',
-        short_name: 'Malen',
+        name: 'Taino',
+        short_name: 'Taino',
         display: 'fullscreen',
         orientation: 'landscape',
         background_color: '#ffffff',

@@ -1,6 +1,7 @@
 import type { Screen } from '../app/screen';
 import { navigate } from '../app/router';
 import { listProfiles } from '../storage/profiles';
+import { isAdult, timeLimited } from '../storage/types';
 import { getDayQuota } from '../storage/quota-store';
 import { dayKey } from '../quota/quota';
 import { remainingToday } from '../quota/session';
@@ -19,6 +20,10 @@ export function profileSelectScreen(): Screen {
     name: 'profile-select',
     mount(root) {
       root.classList.add('profile-select');
+      const brand = document.createElement('h1');
+      brand.className = 'brand';
+      brand.textContent = 'Taino';
+      root.append(brand);
       const list = document.createElement('div');
       list.className = 'profile-list';
       const parent = document.createElement('button');
@@ -43,9 +48,10 @@ export function profileSelectScreen(): Screen {
 
       void (async () => {
         const profiles = await listProfiles();
-        // Erste Öffnung des Tages: Malzeit für heute abfragen
-        if (profiles.length && !(await getDayQuota(dayKey()))) {
-          navigate(dailyPromptScreen(profiles));
+        // Erste Öffnung des Tages: Nutzungszeit der Kinder für heute abfragen
+        const children = profiles.filter((p) => !isAdult(p));
+        if (children.length && !(await getDayQuota(dayKey()))) {
+          navigate(dailyPromptScreen(children));
           return;
         }
         for (const p of profiles) {
@@ -58,7 +64,14 @@ export function profileSelectScreen(): Screen {
           name.className = 'profile-name';
           name.textContent = p.name;
           tile.append(av, name);
-          const exhausted = (await remainingToday(p)) === 0;
+          const exhausted = timeLimited(p) && (await remainingToday(p)) === 0;
+          if (isAdult(p)) {
+            tile.classList.add('adult');
+            const lock = document.createElement('span');
+            lock.className = 'lock-badge';
+            lock.innerHTML = icons.lock;
+            tile.append(lock);
+          }
           if (exhausted) {
             // Für heute aufgebraucht: Mond, nur Galerie ansehen
             tile.classList.add('exhausted');
@@ -68,7 +81,10 @@ export function profileSelectScreen(): Screen {
             moon.innerHTML = icons.moon;
             tile.append(moon);
           }
-          tile.onclick = () => navigate(exhausted ? galleryScreen(p, { viewOnly: true }) : modeMenuScreen(p));
+          tile.onclick = async () => {
+            if (isAdult(p) && !(await requestPin())) return;
+            navigate(exhausted ? galleryScreen(p, { viewOnly: true }) : modeMenuScreen(p));
+          };
           list.append(tile);
         }
         list.append(add);

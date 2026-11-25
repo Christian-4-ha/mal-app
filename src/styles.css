@@ -80,7 +80,7 @@ svg { display: block; width: 100%; height: 100%; }
 .paint-viewport { position: absolute; inset: 0; overflow: hidden; touch-action: none; background: #fff; }
 .paint-stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .paint-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.paint-stage canvas[data-layer="overlay"], .paint-stage canvas[data-layer="template"] { pointer-events: none; }
+.paint-stage canvas[data-layer="overlay"], .paint-stage canvas[data-layer="guides"], .paint-stage canvas[data-layer="template"] { pointer-events: none; }
 .paint-bar { position: absolute; left: 14px; bottom: 14px; display: flex; gap: 14px; z-index: 2; }
 .paint-bar .icon-btn { width: 68px; height: 68px; }
 
@@ -206,3 +206,13 @@ svg { display: block; width: 100%; height: 100%; }
 .lightbox img { max-width: 92vw; max-height: 92vh; background: #fff; border-radius: 12px; }
 .quota-lock { position: absolute; inset: 0; z-index: 6; display: flex; align-items: center; justify-content: center; background: rgba(40,53,147,.55); }
 .quota-lock svg { width: 200px; height: 200px; }
+
+/* --- Taino: Startseite, Profilarten --- */
+.profile-select { background: url('./assets/start-bild.svg') center bottom / cover no-repeat, #e1f5fe; flex-direction: column; }
+.profile-select .brand { position: absolute; top: 18px; left: 0; right: 0; text-align: center; margin: 0; font-size: 64px; font-weight: 900; letter-spacing: 2px; color: #fff; -webkit-text-stroke: 3px #5d4037; text-shadow: 0 4px 0 #5d4037; pointer-events: none; }
+.profile-list { background: rgba(255, 255, 255, .72); border-radius: 32px; margin-top: -120px; }
+.profile-name { font-weight: 700; }
+.lock-badge { position: absolute; right: -6px; top: -6px; width: 42px; height: 42px; }
+.kind-row .active, .time-toggle[data-on] { outline: none; }
+.kind-row button.active { background: #ffca28; border-color: #5d4037; font-weight: 700; }
+.menu-top .time-toggle { margin-left: auto; }

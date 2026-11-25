@@ -6,6 +6,8 @@ export interface PaintSurface {
   readonly paint: HTMLCanvasElement;
   /** Zwischenebene für Werkzeuge mit overlayAlpha. */
   readonly overlay: HTMLCanvasElement;
+  /** Hilfslinien (Mandala-Achsen); werden nie gespeichert. */
+  readonly guides: HTMLCanvasElement;
   /** Leinwandpixel je CSS-Pixel. */
   readonly ratio: number;
   /** Sichtbarer Bereich in CSS-Pixeln (für Zoom-Grenzen). */
@@ -53,6 +55,7 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
   };
   const paint = mk('paint');
   const overlay = mk('overlay');
+  const guides = mk('guides');
   const template = mk('template');
   let templateCache: ImageData | null = null;
   let hasTemplate = false;
@@ -66,6 +69,7 @@ export function createPaintSurface(host: HTMLElement): PaintSurface {
   return {
     paint,
     overlay,
+    guides,
     ratio,
     viewport,
     bounds: { w, h },

@@ -15,7 +15,7 @@ export function createEraser(): Tool {
     begin(c, p) {
       size = c.size;
       c.ctx.save();
-      c.ctx.globalCompositeOperation = 'destination-out';
+      if (!c.maskOnly) c.ctx.globalCompositeOperation = 'destination-out';
       c.ctx.strokeStyle = c.ctx.fillStyle = '#000';
       line.begin(c.ctx, p);
     },

@@ -1,5 +1,5 @@
 import type { Screen } from '../app/screen';
-import type { Profile } from '../storage/types';
+import type { Profile, ProfileKind } from '../storage/types';
 import { navigate } from '../app/router';
 import { createProfile, listProfiles, updateProfile } from '../storage/profiles';
 import { listPictures } from '../storage/pictures';
@@ -21,6 +21,7 @@ export function profileEditScreen(existing: Profile | null, back: () => Screen):
         <h1></h1>
         <div class="avatar-preview"><span class="avatar big"></span></div>
         <label>Name <input name="name" autocomplete="off" maxlength="20"></label>
+        <div class="row kind-row"><button class="file-btn" data-kind="child" data-testid="kind-child">Kind</button><button class="file-btn" data-kind="adult" data-testid="kind-adult">Erwachsener</button></div>
         <div class="row">
           <label class="file-btn">Kamera<input type="file" accept="image/*" capture="user" hidden></label>
           <label class="file-btn">Fotos<input type="file" accept="image/*" hidden></label>
@@ -36,6 +37,11 @@ export function profileEditScreen(existing: Profile | null, back: () => Screen):
       const pick = root.querySelector<HTMLElement>('.avatar-pick')!;
       let avatar: Blob | null = existing?.avatar ?? null;
       nameInput.value = existing?.name ?? '';
+      let kind: ProfileKind = existing?.kind ?? 'child';
+      const kindBtns = root.querySelectorAll<HTMLButtonElement>('[data-kind]');
+      const showKind = () => kindBtns.forEach((b) => b.classList.toggle('active', b.dataset.kind === kind));
+      kindBtns.forEach((b) => (b.onclick = () => ((kind = b.dataset.kind as ProfileKind), showKind())));
+      showKind();
 
       const refresh = () => {
         cleanup();
@@ -83,10 +89,10 @@ export function profileEditScreen(existing: Profile | null, back: () => Screen):
         done.disabled = true;
         const name = nameInput.value.trim();
         if (existing) {
-          await updateProfile({ ...existing, name, avatar });
+          await updateProfile({ ...existing, name, avatar, kind });
         } else {
           const first = (await listProfiles()).length === 0;
-          const p = await createProfile(name, avatar);
+          const p = await createProfile(name, avatar, kind);
           // Erstes Profil: heutiges Kontingent = Standard, damit nicht sofort die Tagesabfrage erscheint
           if (first && !(await getDayQuota(dayKey()))) await setDayQuota(dayKey(), { [p.id]: p.defaultQuotaMin });
         }

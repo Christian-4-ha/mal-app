@@ -20,7 +20,8 @@ import { strokeWidthOnCanvas } from './size-drag';
 import { showSaveToast } from './save-toast';
 import { getTemplateSource } from '../templates';
 import { svgToImage } from '../templates/svg-image';
-import { startQuotaSession } from '../quota/session';
+import { startTimeLimit } from '../quota/time-limit';
+import { applyMat, mandalaAxes, matBounds, symmetryMatrices, unionRect } from './symmetry';
 import { dayOverScreen } from '../screens/day-over';
 
 export interface PaintScreenOptions {
@@ -80,6 +81,18 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       base.width = W;
       base.height = H;
       const bctx = base.getContext('2d', { willReadFrequently: true })!;
+      // Mandala: Strich entsteht auf einer Hilfsebene und wird 2n-fach gespiegelt übertragen
+      const axes = mandalaAxes(opts.modeId);
+      const mirrors = axes ? symmetryMatrices(axes, W / 2, H / 2) : null;
+      const scratch = mirrors ? document.createElement('canvas') : null;
+      if (scratch) {
+        scratch.width = W;
+        scratch.height = H;
+        drawGuides(surface.guides, axes);
+      }
+      const sctx = scratch?.getContext('2d') ?? null;
+      let dirty: Rect | null = null;
+      let frame = 0;
       const history = createHistory<UndoEntry>(UNDO_MAX_STEPS, {
         maxBytes: UNDO_MAX_BYTES,
         sizeOf: (e) => e.data.data.length,
@@ -286,16 +299,58 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         // Rand großzügig: weiche Pinselkante, Sprühradius, gedrehte Musterformen
         pad = strokeCtx.size * 1.5 + 4;
         bbox = tool.maxSize === 0 ? { x: 0, y: 0, w: W, h: H } : growRect(null, p.x, p.y, pad);
+        if (mirrors && tool.maxSize === 0) {
+          // Eimer: an allen gespiegelten Punkten füllen
+          for (const m of mirrors) tool.begin(strokeCtx, { ...p, ...applyMat(m, p.x, p.y) });
+          return;
+        }
+        if (mirrors && sctx) {
+          sctx.clearRect(0, 0, W, H);
+          strokeCtx.ctx = sctx;
+          strokeCtx.maskOnly = tool.id === 'eraser';
+          dirty = null;
+          tool.begin(strokeCtx, p);
+          scheduleCompose();
+          return;
+        }
         tool.begin(strokeCtx, p);
+      };
+
+      /** Mandala: Malebene im betroffenen Bereich = Stand vom Strichbeginn + alle Spiegelkopien. */
+      const compose = () => {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        if (!mirrors || !scratch || !bbox) return;
+        const src = clampRect(bbox, W, H);
+        if (!src) return;
+        for (const m of mirrors) dirty = unionRect(dirty, matBounds(m, src));
+        const d = clampRect(dirty!, W, H);
+        if (!d) return;
+        pctx.clearRect(d.x, d.y, d.w, d.h);
+        pctx.drawImage(base, d.x, d.y, d.w, d.h, d.x, d.y, d.w, d.h);
+        pctx.save();
+        pctx.globalAlpha = tool.overlayAlpha ?? 1;
+        pctx.globalCompositeOperation = tool.id === 'eraser' ? 'destination-out' : 'source-over';
+        for (const m of mirrors) {
+          pctx.setTransform(...m);
+          pctx.drawImage(scratch, src.x, src.y, src.w, src.h, src.x, src.y, src.w, src.h);
+        }
+        pctx.restore();
+      };
+      const scheduleCompose = () => {
+        if (!frame) frame = requestAnimationFrame(compose);
       };
 
       /** Beendet den laufenden Strich; abort = Strich verwerfen (Zwei-Finger-Geste). */
       const finishStroke = (abort: boolean) => {
         if (!strokeCtx) return;
         tool.end(strokeCtx);
-        if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
+        const mandalaStroke = strokeCtx.ctx === sctx;
+        if (mandalaStroke) compose();
+        else if (tool.overlayAlpha !== undefined) surface.commitOverlay(tool.overlayAlpha);
         strokeCtx = null;
-        const rect = bbox && clampRect(bbox, W, H);
+        const rect = mandalaStroke ? dirty && clampRect(dirty, W, H) : bbox && clampRect(bbox, W, H);
+        dirty = null;
         bbox = null;
         if (!rect) return;
         if (abort) {
@@ -326,6 +381,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
               if (bbox) bbox = growRect(bbox, p.x, p.y, pad);
               tool.move(strokeCtx, p);
             }
+            if (strokeCtx.ctx === sctx) scheduleCompose();
             break;
           }
           case 'strokeEnd':
@@ -379,9 +435,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       });
 
       // --- Tageskontingent: Hinweise (Sanduhr) und Ende ---
-      const stopQuota = startQuotaSession(opts.profile, {
-        onWarning: (_m, rem) => showHourglass(area, rem, opts.profile.defaultQuotaMin),
-        onExpired: async () => {
+      const stopQuota = startTimeLimit(opts.profile, area, async () => {
           // Sofort sperren; erst nach erfolgreichem Speichern zum Mond (bei Fehler alle 3 s erneut)
           finishStroke(false);
           ready = false;
@@ -396,7 +450,6 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
             await new Promise((r) => setTimeout(r, 3000));
           }
           navigate(dayOverScreen(opts.profile));
-        },
       });
       cleanups.push(stopQuota);
 
@@ -429,14 +482,21 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
   };
 }
 
-/** Hinweis vor Ablauf, ohne Text: Sanduhr mit Restzeit-Balken, blockiert das Malen nicht. */
-function showHourglass(host: HTMLElement, remainingSec: number, totalMin: number): void {
-  host.querySelector('.hourglass-toast')?.remove();
-  const t = document.createElement('div');
-  t.className = 'hourglass-toast';
-  t.dataset.testid = 'quota-warning';
-  const share = Math.max(0.05, Math.min(1, remainingSec / Math.max(60, totalMin * 60)));
-  t.innerHTML = `${icons.hourglass}<span class="rest-bar"><span style="width:${Math.round(share * 100)}%"></span></span>`;
-  host.append(t);
-  setTimeout(() => t.remove(), 3500);
+/** Dünne gestrichelte Achsen durch die Bildmitte (nur Anzeige). */
+function drawGuides(c: HTMLCanvasElement, n: number): void {
+  const g = c.getContext('2d')!;
+  const cx = c.width / 2;
+  const cy = c.height / 2;
+  const r = Math.hypot(cx, cy);
+  g.clearRect(0, 0, c.width, c.height);
+  g.strokeStyle = 'rgba(120, 144, 156, .45)';
+  g.lineWidth = Math.max(1, c.width / 800);
+  g.setLineDash([12, 10]);
+  for (let k = 0; k < n; k++) {
+    const a = Math.PI / 2 + (Math.PI * k) / n;
+    g.beginPath();
+    g.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r);
+    g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    g.stroke();
+  }
 }

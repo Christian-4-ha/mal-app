@@ -6,6 +6,8 @@ import { createTileRow } from '../ui/tile-row';
 import { renderAvatar } from '../ui/avatar';
 import { icons } from '../ui/icons';
 import { profileSelectScreen } from './profile-select';
+import { isAdult } from '../storage/types';
+import { updateProfile } from '../storage/profiles';
 
 function markActive(row: HTMLElement, id: string) {
   row.querySelectorAll<HTMLElement>('[data-tile]').forEach((t) => t.classList.toggle('active', t.dataset.tile === id));
@@ -28,6 +30,24 @@ export function modeMenuScreen(profile: Profile): Screen {
       av.classList.add('small');
       cleanup = renderAvatar(av, profile);
       top.append(back, av);
+      if (isAdult(profile)) {
+        // Erwachsene: Nutzungszeit an/aus
+        const clock = document.createElement('button');
+        clock.className = 'icon-btn time-toggle';
+        clock.dataset.testid = 'time-toggle';
+        clock.setAttribute('aria-label', 'Nutzungszeit');
+        const show = () => {
+          clock.innerHTML = profile.unlimited ? icons.clockOff : icons.clockOn;
+          clock.dataset.on = String(!profile.unlimited);
+        };
+        clock.onclick = async () => {
+          profile.unlimited = !profile.unlimited;
+          show();
+          await updateProfile(profile);
+        };
+        show();
+        top.append(clock);
+      }
 
       const slots: Record<2 | 3, HTMLElement | null> = { 2: null, 3: null };
       const rows: MenuRows = {

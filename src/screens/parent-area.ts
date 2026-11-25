@@ -83,7 +83,7 @@ export function parentAreaScreen(): Screen {
           card.append(head);
 
           const std = el('div', '', 'parent-line');
-          std.append(el('span', 'Standard-Malzeit:'), createTimePicker(p.defaultQuotaMin, (m) => void updateProfile(Object.assign(cur, { defaultQuotaMin: m })), `std-${p.name}`));
+          std.append(el('span', 'Standard-Nutzungszeit:'), createTimePicker(p.defaultQuotaMin, (m) => void updateProfile(Object.assign(cur, { defaultQuotaMin: m })), `std-${p.name}`));
           card.append(std);
 
           const today = el('div', '', 'parent-line');

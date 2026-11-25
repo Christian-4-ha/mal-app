@@ -5,7 +5,17 @@ export interface Profile {
   defaultQuotaMin: number;
   warningsMin: number[];
   createdAt: number;
+  /** Kind (Standard) oder Erwachsener; Erwachsene öffnen ihr Profil nur mit PIN. */
+  kind?: ProfileKind;
+  /** Nur Erwachsene: Nutzungszeit ausgeschaltet. */
+  unlimited?: boolean;
 }
+
+export type ProfileKind = 'child' | 'adult';
+
+export const isAdult = (p: Pick<Profile, 'kind'>) => p.kind === 'adult';
+/** Gilt für dieses Profil eine Nutzungszeit? */
+export const timeLimited = (p: Pick<Profile, 'kind' | 'unlimited'>) => !(isAdult(p) && p.unlimited);
 
 export interface Picture {
   id: string;

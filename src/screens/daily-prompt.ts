@@ -9,7 +9,7 @@ import { renderAvatar } from '../ui/avatar';
 import { profileSelectScreen } from './profile-select';
 
 /**
- * Erste Öffnung des Tages: Malzeit heute für alle Kinder, mit Standardwerten vorausgefüllt.
+ * Erste Öffnung des Tages: Nutzungszeit heute für alle Kinder, mit Standardwerten vorausgefüllt.
  * „Standard übernehmen“ geht ohne PIN, „Ändern“ nur mit PIN.
  */
 export function dailyPromptScreen(profiles: Profile[]): Screen {
@@ -18,7 +18,7 @@ export function dailyPromptScreen(profiles: Profile[]): Screen {
     name: 'daily-prompt',
     mount(root) {
       root.classList.add('parent-form');
-      root.innerHTML = `<h1>Malzeit heute</h1><div class="quota-list"></div><div class="row"><button class="primary" data-testid="quota-accept">Standard übernehmen</button><button class="file-btn" data-testid="quota-change">Ändern 🔒</button></div>`;
+      root.innerHTML = `<h1>Nutzungszeit heute</h1><div class="quota-list"></div><div class="row"><button class="primary" data-testid="quota-accept">Standard übernehmen</button><button class="file-btn" data-testid="quota-change">Ändern 🔒</button></div>`;
       const list = root.querySelector<HTMLElement>('.quota-list')!;
       const values = new Map(profiles.map((p) => [p.id, p.defaultQuotaMin]));
       const renderList = (editable: boolean) => {

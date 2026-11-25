@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b3e5fc"/>
+      <stop offset="1" stop-color="#e1f5fe"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <!-- Sonne -->
+  <g transform="translate(1440 130)">
+    <circle r="70" fill="#ffeb3b" stroke="#fbc02d" stroke-width="6"/>
+    <g stroke="#fbc02d" stroke-width="10" stroke-linecap="round">
+      <path d="M0 -95 V-125 M0 95 V125 M-95 0 H-125 M95 0 H125 M67 67 L88 88 M-67 -67 L-88 -88 M67 -67 L88 -88 M-67 67 L-88 88"/>
+    </g>
+    <path d="M-25 15 Q0 40 25 15" stroke="#5d4037" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <circle cx="-22" cy="-12" r="7" fill="#5d4037"/><circle cx="22" cy="-12" r="7" fill="#5d4037"/>
+  </g>
+  <!-- Regenbogen -->
+  <g fill="none" stroke-width="34" opacity=".85">
+    <path d="M60 760 A420 420 0 0 1 900 760" stroke="#ef5350"/>
+    <path d="M94 760 A386 386 0 0 1 866 760" stroke="#ffa726"/>
+    <path d="M128 760 A352 352 0 0 1 832 760" stroke="#ffee58"/>
+    <path d="M162 760 A318 318 0 0 1 798 760" stroke="#66bb6a"/>
+    <path d="M196 760 A284 284 0 0 1 764 760" stroke="#42a5f5"/>
+    <path d="M230 760 A250 250 0 0 1 730 760" stroke="#ab47bc"/>
+  </g>
+  <!-- Wolken -->
+  <g fill="#fff">
+    <path d="M150 170 a50 50 0 0 1 90 -30 a60 60 0 0 1 110 20 a45 45 0 0 1 10 90 H160 a40 40 0 0 1 -10 -80 Z"/>
+    <path d="M1000 120 a40 40 0 0 1 75 -25 a50 50 0 0 1 90 15 a38 38 0 0 1 8 75 H1010 a34 34 0 0 1 -10 -65 Z"/>
+  </g>
+  <!-- Wiese -->
+  <path d="M0 760 Q400 700 800 760 T1600 740 V1000 H0 Z" fill="#9ccc65"/>
+  <path d="M0 830 Q420 790 820 840 T1600 820 V1000 H0 Z" fill="#7cb342"/>
+  <g fill="#fff59d" stroke="#f9a825" stroke-width="3">
+    <circle cx="560" cy="900" r="12"/><circle cx="1000" cy="930" r="12"/><circle cx="760" cy="960" r="10"/>
+  </g>
+  <g fill="#f48fb1"><circle cx="620" cy="940" r="10"/><circle cx="880" cy="880" r="10"/></g>
+
+  <!-- Staffelei mit Bild -->
+  <g transform="translate(150 470)">
+    <path d="M40 0 L0 380 M160 0 L200 380 M100 0 V380" stroke="#8d6e63" stroke-width="16" stroke-linecap="round"/>
+    <rect x="-10" y="20" width="220" height="180" rx="8" fill="#fff" stroke="#6d4c41" stroke-width="8"/>
+    <circle cx="60" cy="80" r="30" fill="#ffeb3b"/>
+    <path d="M10 180 Q70 110 120 160 T200 140 V190 H10 Z" fill="#66bb6a"/>
+    <path d="M130 60 q20 -30 40 0 q20 30 -20 50 q-40 -20 -20 -50 Z" fill="#ef5350"/>
+    <rect x="-20" y="196" width="240" height="18" rx="6" fill="#8d6e63"/>
+  </g>
+  <!-- Kind 1: malt -->
+  <g transform="translate(430 560)">
+    <path d="M-60 330 L-40 150 Q0 120 40 150 L60 330 Z" fill="#ff7043"/>
+    <path d="M-40 170 L-120 90" stroke="#ffcc80" stroke-width="26" stroke-linecap="round"/>
+    <path d="M-122 88 L-160 40" stroke="#5d4037" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="-162" cy="36" r="9" fill="#42a5f5"/>
+    <circle cx="0" cy="80" r="70" fill="#ffcc80"/>
+    <path d="M-72 70 Q-60 0 0 2 Q60 0 72 70 Q50 30 0 32 Q-50 30 -72 70 Z" fill="#6d4c41"/>
+    <circle cx="-24" cy="84" r="8" fill="#3e2723"/><circle cx="24" cy="84" r="8" fill="#3e2723"/>
+    <path d="M-22 112 Q0 132 22 112" stroke="#3e2723" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="-44" cy="108" r="10" fill="#ef9a9a" opacity=".7"/><circle cx="44" cy="108" r="10" fill="#ef9a9a" opacity=".7"/>
+  </g>
+
+  <!-- Spieltisch mit Brettspiel -->
+  <g transform="translate(1090 720)">
+    <rect x="-40" y="60" width="420" height="30" rx="10" fill="#a1887f"/>
+    <path d="M0 90 V230 M340 90 V230" stroke="#8d6e63" stroke-width="20" stroke-linecap="round"/>
+    <rect x="70" y="20" width="200" height="44" rx="6" fill="#1e88e5"/>
+    <g fill="#fff"><circle cx="100" cy="42" r="12"/><circle cx="140" cy="42" r="12" fill="#ef5350"/><circle cx="180" cy="42" r="12" fill="#fdd835"/><circle cx="220" cy="42" r="12"/><circle cx="250" cy="42" r="8"/></g>
+    <rect x="300" y="30" width="34" height="34" rx="6" fill="#fff" stroke="#5d4037" stroke-width="4"/>
+    <g fill="#5d4037"><circle cx="310" cy="40" r="4"/><circle cx="324" cy="54" r="4"/><circle cx="317" cy="47" r="4"/></g>
+  </g>
+  <!-- Kind 2 -->
+  <g transform="translate(1040 600)">
+    <path d="M-55 260 L-40 120 Q0 95 40 120 L55 260 Z" fill="#ab47bc"/>
+    <path d="M30 140 L90 175" stroke="#ffcc80" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="0" cy="55" r="62" fill="#ffcc80"/>
+    <path d="M-66 50 Q-60 -12 0 -10 Q60 -12 66 50 L74 110 Q62 70 50 40 Q0 10 -50 40 Q-62 70 -74 110 Z" fill="#fdd835"/>
+    <circle cx="-20" cy="58" r="7" fill="#3e2723"/><circle cx="22" cy="58" r="7" fill="#3e2723"/>
+    <path d="M-20 84 Q0 104 20 84" stroke="#3e2723" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Kind 3 -->
+  <g transform="translate(1500 610)">
+    <path d="M-55 250 L-40 110 Q0 85 40 110 L55 250 Z" fill="#26a69a"/>
+    <path d="M-30 130 L-95 170" stroke="#8d5524" stroke-width="24" stroke-linecap="round"/>
+    <circle cx="0" cy="50" r="60" fill="#8d5524"/>
+    <path d="M-62 40 Q-50 -16 0 -14 Q50 -16 62 40 Q30 6 0 14 Q-30 6 -62 40 Z" fill="#212121"/>
+    <circle cx="-20" cy="54" r="7" fill="#212121"/><circle cx="20" cy="54" r="7" fill="#212121"/>
+    <path d="M-22 78 Q0 102 22 78 Z" fill="#fff" stroke="#212121" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <!-- Farbkleckse -->
+  <g opacity=".9">
+    <circle cx="60" cy="940" r="26" fill="#ef5350"/><circle cx="110" cy="960" r="16" fill="#42a5f5"/>
+    <circle cx="1560" cy="960" r="20" fill="#fdd835"/>
+  </g>
+</svg>

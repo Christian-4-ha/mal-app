@@ -1,7 +1,7 @@
 import { db, type ProfileRecord } from './db';
 import { packBlob, unpackBlob } from './blob-store';
 import { deletePicture, listPictures } from './pictures';
-import type { Profile } from './types';
+import type { Profile, ProfileKind } from './types';
 
 const fromRecord = (r: ProfileRecord): Profile => ({ ...r, avatar: r.avatar && unpackBlob(r.avatar) });
 const toRecord = async (p: Profile): Promise<ProfileRecord> => ({ ...p, avatar: p.avatar && (await packBlob(p.avatar)) });
@@ -13,7 +13,7 @@ export async function listProfiles(): Promise<Profile[]> {
 
 let lastCreatedAt = 0;
 
-export async function createProfile(name: string, avatar: Blob | null): Promise<Profile> {
+export async function createProfile(name: string, avatar: Blob | null, kind: ProfileKind = 'child'): Promise<Profile> {
   // streng steigend, damit die Reihenfolge auch bei gleicher Millisekunde stabil ist
   lastCreatedAt = Math.max(Date.now(), lastCreatedAt + 1);
   const profile: Profile = {
@@ -23,6 +23,7 @@ export async function createProfile(name: string, avatar: Blob | null): Promise<
     defaultQuotaMin: 30,
     warningsMin: [5, 1],
     createdAt: lastCreatedAt,
+    kind,
   };
   const rec = await toRecord(profile);
   await (await db()).put('profiles', rec);

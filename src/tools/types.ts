@@ -15,6 +15,8 @@ export interface ToolContext {
   variant: string | null;
   /** Vorlagenlinien als Flächengrenzen (Ausmalen); null im freien Malen. */
   boundary?: ImageData | null;
+  /** Mandala: Radierer zeichnet die Radierfläche als deckende Maske statt zu radieren. */
+  maskOnly?: boolean;
 }
 
 export interface ToolVariant {
