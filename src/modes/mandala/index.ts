@@ -22,7 +22,7 @@ export function axesIcon(n: number): string {
 export const mandalaMode: Mode = {
   id: 'mandala',
   icon: icons.mandala,
-  order: 15,
+  order: 25,
   expand({ profile }, rows) {
     rows.setRow(
       2,
