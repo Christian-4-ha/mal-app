@@ -35,3 +35,14 @@ describe('circledDiffs', () => {
     expect(circledDiffs([{ x: 390, y: 300 }, { x: 410, y: 300 }], diffs, [])).toEqual([]);
   });
 });
+
+describe('circledDiffs – Kinderhände', () => {
+  it('zweimal herumgekreist zählt', () => {
+    const twice = [...ring(400, 300, 60), ...ring(400, 300, 64)];
+    expect(circledDiffs(twice, diffs, [])).toEqual([1]);
+  });
+
+  it('großer Unterschied (r 85) darf mit großem Kreis (r 125) eingekreist werden', () => {
+    expect(circledDiffs(ring(400, 300, 125), [{ x: 400, y: 300, r: 85 }], [])).toEqual([0]);
+  });
+});

@@ -9,19 +9,28 @@ const COLORS = [
   'linear-gradient(90deg, #6a1b9a, #e1bee7, #6a1b9a)',
 ];
 
-/** Lässt etwa 3 Sekunden Lametta über host regnen; räumt sich selbst auf. */
-export function lametta(host: HTMLElement, count = 70): void {
+/**
+ * Lässt etwa 3 Sekunden Lametta über host regnen; räumt sich selbst auf.
+ * Nur transform-Animationen (außen fallen, innen schaukeln), damit es auch auf alten iPads flüssig läuft.
+ */
+export function lametta(host: HTMLElement, count = 45): void {
   const layer = document.createElement('div');
   layer.className = 'lametta';
   layer.dataset.testid = 'lametta';
   for (let i = 0; i < count; i++) {
-    const s = document.createElement('span');
-    s.style.left = `${Math.random() * 100}%`;
-    s.style.background = COLORS[i % COLORS.length];
-    s.style.height = `${40 + Math.random() * 60}px`;
-    s.style.animationDelay = `${Math.random() * 1.2}s, ${Math.random() * 0.6}s`;
-    s.style.animationDuration = `${2.2 + Math.random() * 1.4}s, ${0.5 + Math.random() * 0.4}s`;
-    layer.append(s);
+    const fall = document.createElement('span');
+    fall.className = 'lametta-fall';
+    fall.style.left = `${Math.random() * 100}%`;
+    fall.style.animationDelay = `${Math.random() * 1.2}s`;
+    fall.style.animationDuration = `${2.2 + Math.random() * 1.4}s`;
+    const strip = document.createElement('span');
+    strip.className = 'lametta-strip';
+    strip.style.background = COLORS[i % COLORS.length];
+    strip.style.height = `${40 + Math.random() * 60}px`;
+    strip.style.animationDelay = `${Math.random() * 0.6}s`;
+    strip.style.animationDuration = `${0.5 + Math.random() * 0.4}s`;
+    fall.append(strip);
+    layer.append(fall);
   }
   host.append(layer);
   setTimeout(() => layer.remove(), 4200);

@@ -124,10 +124,26 @@ export function dotsScreen(profile: Profile, pic: DotPicture): Screen {
         cleanups.push(() => clearTimeout(t));
       };
 
+      /** Abstand von (x, y) zur Strecke a–b (schnelles Wischen überspringt sonst Punkte). */
+      const segDist = (x: number, y: number, a: [number, number], b: [number, number]) => {
+        const dx = b[0] - a[0];
+        const dy = b[1] - a[1];
+        const l = dx * dx + dy * dy;
+        const t = l ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / l)) : 0;
+        return Math.hypot(x - (a[0] + t * dx), y - (a[1] + t * dy));
+      };
+      let prev: [number, number] | null = null;
       const check = (pt: [number, number]) => {
-        if (done) return;
-        const [x, y] = pic.points[reached];
-        if (Math.hypot(pt[0] - x, pt[1] - y) > HIT) return;
+        const from = prev ?? pt;
+        prev = pt;
+        // mehrere Punkte auf einer schnellen Strecke nacheinander erlauben
+        while (!done) {
+          const [x, y] = pic.points[reached];
+          if (segDist(x, y, from, pt) > HIT) return;
+          hit();
+        }
+      };
+      const hit = () => {
         if (reached > 0) line(pic.points[reached - 1], pic.points[reached]);
         dots[reached].classList.add('reached');
         reached++;
@@ -136,7 +152,7 @@ export function dotsScreen(profile: Profile, pic: DotPicture): Screen {
         if (reached === n) finish();
       };
 
-      let active = false;
+      let active: number | null = null;
       const rubberTo = (pt: [number, number]) => {
         if (done || reached === 0) return;
         const [x, y] = pic.points[reached - 1];
@@ -147,20 +163,24 @@ export function dotsScreen(profile: Profile, pic: DotPicture): Screen {
         rubber.setAttribute('visibility', 'visible');
       };
       svg.addEventListener('pointerdown', (e) => {
-        active = true;
+        if (active !== null) return;
+        active = e.pointerId;
         svg.setPointerCapture?.(e.pointerId);
+        prev = null;
         const pt = toSvg(e);
         if (pt) check(pt);
       });
       svg.addEventListener('pointermove', (e) => {
-        if (!active) return;
+        if (e.pointerId !== active) return;
         const pt = toSvg(e);
         if (!pt) return;
         check(pt);
         rubberTo(pt);
       });
-      const up = () => {
-        active = false;
+      const up = (e: PointerEvent) => {
+        if (e.pointerId !== active) return;
+        active = null;
+        prev = null;
         rubber.setAttribute('visibility', 'hidden');
       };
       svg.addEventListener('pointerup', up);

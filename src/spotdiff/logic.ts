@@ -12,32 +12,35 @@ export interface DiffSpot {
   r: number;
 }
 
-/** Größte Fläche eines Kreises, der noch zählt (damit nicht das halbe Bild eingekreist werden kann). */
-const MAX_AREA = 200 * 200;
-
-function inside(p: Pt, poly: Pt[]): boolean {
-  let hit = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+/**
+ * Umlaufzahl des (automatisch geschlossenen) Fingerwegs um p: ≠ 0 heißt eingekreist,
+ * auch wenn das Kind zweimal herumfährt.
+ */
+function winding(p: Pt, poly: Pt[]): number {
+  let wn = 0;
+  for (let i = 0; i < poly.length; i++) {
     const a = poly[i];
-    const b = poly[j];
-    if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x) hit = !hit;
+    const b = poly[(i + 1) % poly.length];
+    const side = (b.x - a.x) * (p.y - a.y) - (p.x - a.x) * (b.y - a.y);
+    if (a.y <= p.y) {
+      if (b.y > p.y && side > 0) wn++;
+    } else if (b.y <= p.y && side < 0) wn--;
   }
-  return hit;
-}
-
-function area(poly: Pt[]): number {
-  let s = 0;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) s += (poly[j].x + poly[i].x) * (poly[j].y - poly[i].y);
-  return Math.abs(s / 2);
+  return wn;
 }
 
 /**
- * Indizes der Unterschiede, deren Mitte im (automatisch geschlossenen) Fingerkreis liegt.
- * Schon gefundene, zu kleine (Strich, Tippen) und riesige Kreise zählen nicht.
+ * Indizes der Unterschiede, deren Mitte vom Fingerweg umrundet wird.
+ * Nicht gezählt: schon gefundene, Striche/Tippen (zu klein) und Kreise, die viel größer als der
+ * Unterschied sind (kein Einkreisen des halben Bildes).
  */
 export function circledDiffs(stroke: Pt[], diffs: DiffSpot[], found: number[]): number[] {
   if (stroke.length < 6) return [];
-  const a = area(stroke);
-  if (a < 400 || a > MAX_AREA) return [];
-  return diffs.map((d, i) => (!found.includes(i) && inside(d, stroke) ? i : -1)).filter((i) => i >= 0);
+  const xs = stroke.map((p) => p.x);
+  const ys = stroke.map((p) => p.y);
+  const size = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  if (Math.min(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) < 20) return [];
+  return diffs
+    .map((d, i) => (!found.includes(i) && size <= Math.max(5 * d.r, 260) && winding(d, stroke) !== 0 ? i : -1))
+    .filter((i) => i >= 0);
 }

@@ -83,6 +83,7 @@ export function spotDiffScreen(profile: Profile, scene: Scene): Screen {
 
       const win = () => {
         root.dataset.done = 'true';
+        clearTimeout(helpTimer);
         help.classList.remove('show');
         lametta(root);
         const t = window.setTimeout(() => {
@@ -119,7 +120,8 @@ export function spotDiffScreen(profile: Profile, scene: Scene): Screen {
       for (const svg of panels) {
         const strokeEl = svg.querySelector<SVGPathElement>('.diff-stroke')!;
         let pts: Pt[] = [];
-        let active = false;
+        // nur der erste Finger zeichnet (ein aufgelegter Handballen stört nicht)
+        let active: number | null = null;
         const toSvg = (e: PointerEvent): Pt | null => {
           const m = svg.getScreenCTM();
           if (!m) return null;
@@ -132,8 +134,8 @@ export function spotDiffScreen(profile: Profile, scene: Scene): Screen {
         const draw = () =>
           strokeEl.setAttribute('d', pts.length ? 'M' + pts.map((p) => `${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' L') : '');
         svg.addEventListener('pointerdown', (e) => {
-          if (root.dataset.done) return;
-          active = true;
+          if (root.dataset.done || active !== null) return;
+          active = e.pointerId;
           svg.setPointerCapture?.(e.pointerId);
           strokeEl.classList.remove('fade');
           const p = toSvg(e);
@@ -141,14 +143,14 @@ export function spotDiffScreen(profile: Profile, scene: Scene): Screen {
           draw();
         });
         svg.addEventListener('pointermove', (e) => {
-          if (!active) return;
+          if (e.pointerId !== active) return;
           const p = toSvg(e);
           if (p) pts.push(p);
           draw();
         });
-        const end = () => {
-          if (!active) return;
-          active = false;
+        const end = (e: PointerEvent) => {
+          if (e.pointerId !== active) return;
+          active = null;
           const hits = circledDiffs(pts, scene.diffs, found);
           for (const i of hits) {
             found.push(i);

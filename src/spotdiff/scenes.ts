@@ -108,7 +108,7 @@ ${star(80, 80, 14, '#fff59d')}${star(300, 60, 10, '#fff59d')}${star(520, 120, 12
     { x: 360, y: 240, r: 40, left: `<circle cx="360" cy="240" r="18" fill="#4fc3f7" ${O}/>`, right: `<circle cx="360" cy="240" r="18" fill="#ffee58" ${O}/>` },
     { x: 680, y: 70, r: 40, left: '', right: star(680, 70, 22, '#fff59d') },
     { x: 615, y: 505, r: 32, left: '', right: `<circle cx="615" cy="505" r="15" fill="#90a4ae"/>` },
-    { x: 560, y: 280, r: 55, left: `<g transform="translate(560 280)"><ellipse rx="34" ry="30" fill="#76ff03" ${O}/><circle cx="-12" cy="-6" r="7" fill="#fff" ${O}/><circle cx="12" cy="-6" r="7" fill="#fff" ${O}/><path d="M-10 12 Q0 20 10 12" ${O} fill="none"/><path d="M-14 -28 L-22 -48 M14 -28 L22 -48" ${O}/><circle cx="-22" cy="-50" r="5" fill="#e91e63"/><circle cx="22" cy="-50" r="5" fill="#e91e63"/></g>`, right: `<g transform="translate(560 280)"><ellipse rx="34" ry="30" fill="#76ff03" ${O}/><circle cx="-12" cy="-6" r="7" fill="#fff" ${O}/><circle cx="12" cy="-6" r="7" fill="#fff" ${O}/><path d="M-10 12 Q0 20 10 12" ${O} fill="none"/></g>` },
+    { x: 560, y: 245, r: 42, left: `<g transform="translate(560 280)"><ellipse rx="34" ry="30" fill="#76ff03" ${O}/><circle cx="-12" cy="-6" r="7" fill="#fff" ${O}/><circle cx="12" cy="-6" r="7" fill="#fff" ${O}/><path d="M-10 12 Q0 20 10 12" ${O} fill="none"/><path d="M-14 -28 L-22 -48 M14 -28 L22 -48" ${O}/><circle cx="-22" cy="-50" r="5" fill="#e91e63"/><circle cx="22" cy="-50" r="5" fill="#e91e63"/></g>`, right: `<g transform="translate(560 280)"><ellipse rx="34" ry="30" fill="#76ff03" ${O}/><circle cx="-12" cy="-6" r="7" fill="#fff" ${O}/><circle cx="12" cy="-6" r="7" fill="#fff" ${O}/><path d="M-10 12 Q0 20 10 12" ${O} fill="none"/></g>` },
   ],
 };
 
