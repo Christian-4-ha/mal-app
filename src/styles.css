@@ -363,3 +363,14 @@ svg { display: block; width: 100%; height: 100%; }
 .palette-tab.tab-glitter.active { background-color: #f8bbd0; }
 .palette-tab.tab-glitter svg { animation: twinkle 1.4s ease-in-out infinite; }
 @keyframes twinkle { 50% { transform: scale(1.15) rotate(12deg); } }
+
+/* --- EnteTaino: Werkzeuge mit Motiv-Wechsel --- */
+.tool-wrap { position: relative; flex: none; }
+.tool-wrap .tool-btn { display: block; }
+.variant-switch {
+  position: absolute; left: -14px; bottom: -10px; width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid #fff; background: #ffd54f; padding: 5px; box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,.3); z-index: 1;
+}
+.variant-switch svg { display: block; width: 100%; height: 100%; }
+.variant-switch:active { transform: rotate(90deg) scale(.95); }
+.variant-badge { display: none; }

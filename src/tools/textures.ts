@@ -1,7 +1,7 @@
 import { addSparkles } from './glitter';
 
-/** Prozedural erzeugte 64×64-Texturkacheln je Farbe und Oberfläche (gecacht). */
-const SIZE = 64;
+/** Prozedural erzeugte 96×96-Musterkacheln je Farbe und Muster (gecacht). */
+const SIZE = 96;
 const cache = new Map<string, HTMLCanvasElement>();
 
 // Fester Zufall, damit Kacheln stabil aussehen
@@ -39,36 +39,69 @@ export function textureTile(color: string, variant: string): HTMLCanvasElement {
   ctx.fillStyle = color;
 
   if (variant === 'crayon') {
-    // Wachsmalstift: dichte Körnung mit Lücken
-    for (let i = 0; i < 1400; i++) {
-      ctx.globalAlpha = 0.5 + r() * 0.5;
-      ctx.fillRect(r() * SIZE, r() * SIZE, 1 + r() * 2, 1 + r());
+    // Wachsmalstift: kräftige Farbe mit schrägen, hellen Rillen und Lücken
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.globalCompositeOperation = 'destination-out';
+    for (let k = -SIZE; k < SIZE * 2; k += 6) {
+      ctx.globalAlpha = 0.35 + r() * 0.5;
+      ctx.lineWidth = 1.5 + r() * 2;
+      ctx.beginPath();
+      // diagonal, nahtlos über die Kachelkanten
+      ctx.moveTo(k, 0);
+      ctx.lineTo(k - SIZE, SIZE);
+      ctx.strokeStyle = '#000';
+      ctx.stroke();
+    }
+    for (let i = 0; i < 160; i++) {
+      ctx.globalAlpha = 0.9;
+      ctx.fillRect(r() * SIZE, r() * SIZE, 2 + r() * 4, 1 + r() * 2);
     }
   } else if (variant === 'chalk') {
-    // Kreide: lockere, helle Körnung
-    ctx.globalAlpha = 0.35;
+    // Kreide: heller, staubig, mit vielen Löchern
+    ctx.globalAlpha = 0.75;
     ctx.fillRect(0, 0, SIZE, SIZE);
-    for (let i = 0; i < 500; i++) {
-      ctx.globalAlpha = 0.4 + r() * 0.6;
-      ctx.fillRect(r() * SIZE, r() * SIZE, 1 + r() * 3, 1);
-    }
-  } else if (variant === 'fabric') {
-    // Stoff: Kreuzgewebe
-    ctx.fillRect(0, 0, SIZE, SIZE);
-    ctx.globalAlpha = 0.25;
+    ctx.globalAlpha = 0.45;
     ctx.fillStyle = '#fff';
-    for (let i = 0; i < SIZE; i += 4) {
-      ctx.fillRect(i, 0, 1, SIZE);
-      ctx.fillRect(0, i + 2, SIZE, 1);
-    }
-  } else {
-    // Glitzer: Grundfarbe mit hellen Funken
     ctx.fillRect(0, 0, SIZE, SIZE);
-    for (let i = 0; i < 70; i++) {
-      ctx.globalAlpha = 0.5 + r() * 0.5;
-      ctx.fillStyle = r() > 0.5 ? '#ffffff' : '#fff59d';
-      const s = 1 + r() * 2;
-      ctx.fillRect(r() * SIZE, r() * SIZE, s, s);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < 900; i++) ctx.fillRect(r() * SIZE, r() * SIZE, 1 + r() * 3, 1 + r() * 2);
+  } else if (variant === 'stripes') {
+    // Streifen: Farbe mit breiten, schrägen weißen Streifen
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 9;
+    for (let k = -SIZE; k <= SIZE * 2; k += 24) {
+      ctx.beginPath();
+      ctx.moveTo(k, 0);
+      ctx.lineTo(k - SIZE, SIZE);
+      ctx.stroke();
+    }
+  } else if (variant === 'dots') {
+    // Punkte: Farbe mit großen weißen Tupfen im Versatz
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.fillStyle = '#fff';
+    for (let y = 0; y <= SIZE; y += 24)
+      for (let x = 0; x <= SIZE; x += 24) {
+        const ox = (y / 24) % 2 ? 12 : 0;
+        ctx.beginPath();
+        ctx.arc(x + ox, y, 6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+  } else {
+    // Karo (Stoff): helle Fläche, kräftige Balken quer und längs, feine weiße Fäden
+    ctx.globalAlpha = 0.4;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.globalAlpha = 0.65;
+    for (let k = 0; k < SIZE; k += 24) {
+      ctx.fillRect(0, k, SIZE, 10);
+      ctx.fillRect(k, 0, 10, SIZE);
+    }
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = '#fff';
+    for (let k = 17; k < SIZE; k += 24) {
+      ctx.fillRect(0, k, SIZE, 2);
+      ctx.fillRect(k, 0, 2, SIZE);
     }
   }
   cache.set(key, c);

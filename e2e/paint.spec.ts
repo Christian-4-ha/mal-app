@@ -107,3 +107,20 @@ test('Regenbogen und Größe bleiben stehen, wenn die Farben scrollen', async ({
   expect((await page.getByTestId('rainbow').boundingBox())!.y).toBe(before);
   await expect(page.locator('.color-fixed [data-testid="size"]')).toBeVisible();
 });
+
+test('Wechsel-Knopf am Stempel öffnet die Auswahl, das Feld zeigt danach das Herz', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  const sw = page.getByTestId('variant-switch-pattern');
+  const box = (await sw.boundingBox())!;
+  expect(box.width).toBeGreaterThanOrEqual(40);
+  await sw.click();
+  const pop = page.getByTestId('variant-popup');
+  await expect(pop).toBeVisible();
+  await pop.locator('[data-variant="heart"]').click();
+  await expect(page.getByTestId('tool-pattern')).toHaveAttribute('data-variant', 'heart');
+  await expect(page.getByTestId('tool-pattern')).toHaveClass(/active/);
+  // Muster-Werkzeug: deutliche Muster zur Wahl
+  await page.getByTestId('variant-switch-texture').click();
+  await expect(page.getByTestId('variant-popup').locator('[data-variant]')).toHaveCount(5);
+});

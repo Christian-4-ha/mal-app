@@ -229,10 +229,28 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         b.dataset.testid = 'tool-' + t.id;
         b.setAttribute('aria-label', t.id);
         b.innerHTML = t.icon;
+        const openVariants = () => {
+          selectTool(t);
+          openVariantPopup(b, t.variants!, variants.get(t.id) ?? null, color, (id) => {
+            variants.set(t.id, id);
+            refresh();
+          });
+        };
+        let wrap: HTMLElement = b;
         if (t.variants) {
-          const badge = document.createElement('span');
-          badge.className = 'variant-badge';
-          b.append(badge);
+          // Feld zeigt das gewählte Motiv; daneben ein großer Wechsel-Knopf (zwei Pfeile)
+          wrap = document.createElement('div');
+          wrap.className = 'tool-wrap';
+          const sw = document.createElement('button');
+          sw.className = 'variant-switch';
+          sw.dataset.testid = 'variant-switch-' + t.id;
+          sw.setAttribute('aria-label', 'Wechseln');
+          sw.innerHTML = icons.swap;
+          sw.onclick = (e) => {
+            e.stopPropagation();
+            openVariants();
+          };
+          wrap.append(b, sw);
         }
         let held = false;
         let holdTimer = 0;
@@ -241,11 +259,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
           if (!t.variants) return;
           holdTimer = window.setTimeout(() => {
             held = true;
-            selectTool(t);
-            openVariantPopup(b, t.variants!, variants.get(t.id) ?? null, color, (id) => {
-              variants.set(t.id, id);
-              refresh();
-            });
+            openVariants();
           }, 400);
         };
         b.onpointerup = b.onpointerleave = b.onpointercancel = () => clearTimeout(holdTimer);
@@ -253,15 +267,17 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
           if (!held) selectTool(t);
         };
         toolButtons.set(t.id, b);
-        toolCol.append(b);
+        toolCol.append(wrap);
       }
 
       const refresh = () => {
         for (const [id, b] of toolButtons) {
           b.classList.toggle('active', id === tool.id);
-          const badge = b.querySelector('.variant-badge');
           const v = tools.find((x) => x.id === id)?.variants?.find((x) => x.id === variants.get(id));
-          if (badge && v) badge.innerHTML = v.icon;
+          if (v && b.dataset.variant !== v.id) {
+            b.innerHTML = v.icon;
+            b.dataset.variant = v.id;
+          }
         }
         for (const s of swatches)
           s.classList.toggle('active', s.dataset.color === color && s.classList.contains('glitter') === glitter);

@@ -3,7 +3,7 @@ import { icons } from '../ui/icons';
 import { createSmoothLine } from './stroke';
 import { sparkledTile, textureTile } from './textures';
 
-/** Texturstift: Strich mit Oberfläche (Wachsmalstift, Kreide, Stoff) in der gewählten Farbe. */
+/** Texturstift: Strich mit Oberfläche (Wachsmalstift, Kreide, Streifen, Punkte, Karo) in der gewählten Farbe. */
 export function createTexture(): Tool {
   let size = 24;
   const line = createSmoothLine(() => size);
@@ -17,6 +17,8 @@ export function createTexture(): Tool {
     variants: [
       { id: 'crayon', icon: icons.crayon },
       { id: 'chalk', icon: icons.chalk },
+      { id: 'stripes', icon: icons.stripes },
+      { id: 'dots', icon: icons.dots },
       { id: 'fabric', icon: icons.fabric },
     ],
     begin(c, p) {
