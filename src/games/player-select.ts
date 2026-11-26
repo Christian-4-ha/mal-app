@@ -19,17 +19,25 @@ export function playerSelectScreen(owner: Profile, game: Game): Screen {
       back.setAttribute('aria-label', 'Zurück');
       back.innerHTML = icons.back;
       back.onclick = () => navigate(modeMenuScreen(owner, 'play'));
-      const head = document.createElement('div');
-      head.className = 'versus-head';
-      const me = document.createElement('span');
-      cleanups.push(renderAvatar(me, owner));
+      // Links ich (groß), in der Mitte „gegen“, rechts die möglichen Mitspieler
+      const me = document.createElement('div');
+      me.className = 'versus-me';
+      me.dataset.testid = 'me';
+      const meAv = document.createElement('span');
+      cleanups.push(renderAvatar(meAv, owner));
+      const meName = document.createElement('span');
+      meName.className = 'profile-name';
+      meName.textContent = owner.name;
+      const gameIcon = document.createElement('span');
+      gameIcon.className = 'versus-game';
+      gameIcon.innerHTML = game.icon;
+      me.append(gameIcon, meAv, meName);
       const vs = document.createElement('span');
       vs.className = 'versus-icon';
-      vs.innerHTML = game.icon;
-      head.append(me, vs);
+      vs.innerHTML = icons.versus;
       const list = document.createElement('div');
-      list.className = 'profile-list';
-      root.append(back, head, list);
+      list.className = 'profile-list versus-list';
+      root.append(back, me, vs, list);
 
       const tile = (p: Player, testid: string) => {
         const b = document.createElement('button');

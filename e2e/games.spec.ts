@@ -5,7 +5,12 @@ async function startGame(page: Page, game: string) {
   await createAndOpenProfile(page);
   await page.getByTestId('tile-play').click();
   await page.getByTestId(`tile-${game}`).click();
+  await expect(page.getByTestId('me')).toBeVisible();
   await page.getByTestId('opponent-guest').click();
+  // Farben einloggen: Spieler 1 blau, Spieler 2 grün
+  await page.getByTestId('color-0-2').click();
+  await page.getByTestId('color-1-3').click();
+  await expect(page.getByTestId('color-pick')).toHaveCount(0);
   await expect(page.locator(`[data-screen="game"][data-game="${game}"]`)).toBeVisible();
 }
 
@@ -62,4 +67,41 @@ test('Puzzle mit 6 Teilen lässt sich zusammensetzen', async ({ page }) => {
   }
   await expect(page.locator('.puzzle-piece.placed')).toHaveCount(6);
   await expect(page.getByTestId('puzzle-done')).toBeVisible();
+});
+
+test('Farbe einloggen: die Farbe des anderen ist gesperrt, erst mit zwei Farben geht es los', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await page.getByTestId('tile-play').click();
+  await page.getByTestId('tile-tictactoe').click();
+  await page.getByTestId('opponent-guest').click();
+  await page.getByTestId('color-0-0').click();
+  await expect(page.getByTestId('color-1-0')).toHaveClass(/taken/);
+  await page.getByTestId('color-1-0').click({ force: true });
+  await expect(page.getByTestId('color-pick')).toBeVisible();
+  await page.getByTestId('color-1-4').click();
+  await expect(page.getByTestId('color-pick')).toHaveCount(0);
+  await page.getByTestId('ttt-cell-4').click();
+  await expect(page.getByTestId('ttt-cell-4').locator('path')).toHaveAttribute('stroke', '#e53935');
+});
+
+test('Tic-Tac-Toe: Felder behalten ihre Größe, wenn ein Zeichen gesetzt wird', async ({ page }) => {
+  await startGame(page, 'tictactoe');
+  const sizes = async () =>
+    page.locator('.ttt-cell').evaluateAll((els) => els.map((e) => `${Math.round(e.getBoundingClientRect().width)}x${Math.round(e.getBoundingClientRect().height)}`));
+  const before = await sizes();
+  expect(new Set(before).size).toBe(1);
+  await page.getByTestId('ttt-cell-4').click();
+  await page.getByTestId('ttt-cell-0').click();
+  expect(await sizes()).toEqual(before);
+});
+
+test('Vier gewinnt: Brett hat echte Löcher, der Stein ist sichtbar und hat die gewählte Farbe', async ({ page }) => {
+  await startGame(page, 'connect4');
+  const board = (await page.locator('.board-connect4').boundingBox())!;
+  expect(board.width).toBeGreaterThan(400);
+  await page.getByTestId('c4-col-3').click();
+  const stone = page.locator('.c4-stone').first();
+  const box = (await stone.boundingBox())!;
+  expect(box.height).toBeGreaterThan(20);
+  await expect(stone).toHaveCSS('background-color', 'rgb(30, 136, 229)');
 });

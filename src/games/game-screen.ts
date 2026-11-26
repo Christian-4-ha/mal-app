@@ -16,10 +16,13 @@ export interface Player {
 }
 
 export const GUEST: Player = { id: 'guest', name: 'Gast', avatar: null };
-export const PLAYER_COLORS = ['#e53935', '#fbc02d'] as const;
+/** Steinfarben zur Wahl vor dem Spiel. */
+export const GAME_COLORS = ['#e53935', '#fbc02d', '#1e88e5', '#43a047', '#8e24aa', '#ec407a'] as const;
 
 export interface GameApi {
   readonly turn: P;
+  /** Gewählte Farbe des Spielers. */
+  color(p: P): string;
   setTurn(p: P): void;
   /** Kleine Zusatzanzeige unter dem Spieler (z. B. Steine zum Setzen bei Mühle). */
   setInfo(p: P, html: string): void;
@@ -35,16 +38,20 @@ export interface Game {
 }
 
 /** Spieler-Abzeichen mit Avatar und Steinfarbe. */
-function badge(player: Player, p: P, cleanups: (() => void)[]): HTMLElement {
-  const b = document.createElement('div');
-  b.className = 'player-badge';
-  b.dataset.testid = `player-${p}`;
-  b.style.setProperty('--pc', PLAYER_COLORS[p]);
+function playerAvatar(player: Player, cleanups: (() => void)[]): HTMLElement {
   const av = document.createElement('span');
   if (player.id === GUEST.id) {
     av.className = 'avatar guest-avatar';
     av.innerHTML = icons.guest;
   } else cleanups.push(renderAvatar(av, player));
+  return av;
+}
+
+function badge(player: Player, p: P, cleanups: (() => void)[]): HTMLElement {
+  const b = document.createElement('div');
+  b.className = 'player-badge';
+  b.dataset.testid = `player-${p}`;
+  const av = playerAvatar(player, cleanups);
   const stone = document.createElement('span');
   stone.className = 'player-stone';
   const info = document.createElement('span');
@@ -55,7 +62,7 @@ function badge(player: Player, p: P, cleanups: (() => void)[]): HTMLElement {
 
 /** Konfetti ohne Bibliothek. */
 function confetti(host: HTMLElement): void {
-  const colors = ['#e53935', '#fbc02d', '#43a047', '#1e88e5', '#8e24aa', '#fb8c00'];
+  const colors = [...GAME_COLORS, '#fb8c00'];
   for (let i = 0; i < 60; i++) {
     const c = document.createElement('span');
     c.className = 'confetti';
@@ -67,8 +74,72 @@ function confetti(host: HTMLElement): void {
   }
 }
 
+/**
+ * Vor dem Spiel: Jeder Spieler tippt auf seiner Seite eine Farbe an („einloggen“).
+ * Die Farbe des anderen ist gesperrt; haben beide gewählt, geht es los.
+ */
+function colorPick(
+  host: HTMLElement,
+  players: [Player, Player],
+  game: Game,
+  cleanups: (() => void)[],
+  done: (colors: [string, string]) => void,
+): void {
+  const pick = document.createElement('div');
+  pick.className = 'color-pick';
+  pick.dataset.testid = 'color-pick';
+  const chosen: (string | null)[] = [null, null];
+  const sides = ([0, 1] as P[]).map((p) => {
+    const side = document.createElement('div');
+    side.className = 'pick-side';
+    side.dataset.testid = `pick-${p}`;
+    const av = playerAvatar(players[p], cleanups);
+    const grid = document.createElement('div');
+    grid.className = 'pick-colors';
+    GAME_COLORS.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.className = 'pick-color';
+      b.dataset.testid = `color-${p}-${i}`;
+      b.dataset.color = c;
+      b.style.background = c;
+      b.setAttribute('aria-label', 'Farbe');
+      b.onclick = () => {
+        if (chosen[1 - p] === c || chosen[0] && chosen[1]) return;
+        chosen[p] = c;
+        update();
+        if (chosen[0] && chosen[1]) setTimeout(() => done([chosen[0]!, chosen[1]!]), 600);
+      };
+      grid.append(b);
+    });
+    side.append(av, grid);
+    return side;
+  });
+  const mid = document.createElement('div');
+  mid.className = 'pick-mid';
+  mid.innerHTML = `<span class="pick-game">${game.icon}</span><span class="pick-vs">${icons.versus}</span>`;
+  pick.append(sides[0], mid, sides[1]);
+  const update = () =>
+    sides.forEach((side, p) => {
+      side.classList.toggle('ready', !!chosen[p]);
+      if (chosen[p]) side.style.setProperty('--pc', chosen[p]);
+      side.querySelectorAll<HTMLButtonElement>('.pick-color').forEach((b) => {
+        b.classList.toggle('chosen', b.dataset.color === chosen[p]);
+        const taken = b.dataset.color === chosen[1 - p];
+        b.classList.toggle('taken', taken);
+        b.setAttribute('aria-disabled', String(taken));
+      });
+    });
+  host.append(pick);
+}
+
 /** Gemeinsamer Rahmen für Zwei-Spieler-Spiele an einem iPad. Zeit zählt für owner. */
-export function gameScreen(owner: Profile, players: [Player, Player], game: Game, first: P = 0): Screen {
+export function gameScreen(
+  owner: Profile,
+  players: [Player, Player],
+  game: Game,
+  first: P = 0,
+  chosenColors?: [string, string],
+): Screen {
   const cleanups: (() => void)[] = [];
   let stopGame = () => {};
   return {
@@ -88,6 +159,7 @@ export function gameScreen(owner: Profile, players: [Player, Player], game: Game
       root.append(home, badges[0], board, badges[1]);
 
       let round = first;
+      let colors: [string, string] = chosenColors ?? [GAME_COLORS[0], GAME_COLORS[1]];
       const start = (f: P) => {
         stopGame();
         root.querySelector('.game-over')?.remove();
@@ -99,6 +171,7 @@ export function gameScreen(owner: Profile, players: [Player, Player], game: Game
           get turn() {
             return turn;
           },
+          color: (p) => colors[p],
           setTurn(p) {
             turn = p;
             show();
@@ -141,7 +214,18 @@ export function gameScreen(owner: Profile, players: [Player, Player], game: Game
         root.append(over);
       };
 
-      start(round);
+      const begin = (c: [string, string]) => {
+        colors = c;
+        root.querySelector('.color-pick')?.remove();
+        badges.forEach((b, i) => b.style.setProperty('--pc', c[i]));
+        root.classList.remove('picking');
+        start(round);
+      };
+      if (chosenColors) begin(chosenColors);
+      else {
+        root.classList.add('picking');
+        colorPick(root, players, game, cleanups, begin);
+      }
       cleanups.push(() => stopGame());
       cleanups.push(startTimeLimit(owner, root, () => navigate(dayOverScreen(owner))));
     },

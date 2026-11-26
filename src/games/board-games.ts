@@ -1,14 +1,14 @@
 import { icons } from '../ui/icons';
-import { PLAYER_COLORS, type Game } from './game-screen';
+import type { Game } from './game-screen';
 import {
   C4_COLS, C4_ROWS, MILL_POS, c4Drop, c4Line, millCanMove, millMove, millPlace, millRemovable,
   millRemove, millStart, tttWinner, type Cell, type MillState, type P,
 } from './logic';
 
-const mark = (p: P) =>
+const mark = (p: P, color: string) =>
   p === 0
-    ? `<svg viewBox="0 0 64 64"><path d="M14 14 L50 50 M50 14 L14 50" stroke="${PLAYER_COLORS[0]}" stroke-width="10" stroke-linecap="round"/></svg>`
-    : `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="19" fill="none" stroke="${PLAYER_COLORS[1]}" stroke-width="10"/></svg>`;
+    ? `<svg viewBox="0 0 64 64"><path d="M14 14 L50 50 M50 14 L14 50" stroke="${color}" stroke-width="10" stroke-linecap="round"/></svg>`
+    : `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="19" fill="none" stroke="${color}" stroke-width="10"/></svg>`;
 
 export const ticTacToe: Game = {
   id: 'tictactoe',
@@ -24,7 +24,7 @@ export const ticTacToe: Game = {
         if (over || cells[i] !== null) return;
         const p = api.turn;
         cells[i] = p;
-        b.innerHTML = mark(p);
+        b.innerHTML = mark(p, api.color(p));
         b.dataset.p = String(p);
         const w = tttWinner(cells);
         if (w) {
@@ -51,8 +51,9 @@ export const connectFour: Game = {
     let over = false;
     const holes: HTMLElement[] = [];
     for (let c = 0; c < C4_COLS; c++) {
-      const col = document.createElement('button');
+      const col = document.createElement('div');
       col.className = 'c4-col';
+      col.setAttribute('role', 'button');
       col.dataset.testid = `c4-col-${c}`;
       for (let r = 0; r < C4_ROWS; r++) {
         const h = document.createElement('span');
@@ -68,7 +69,7 @@ export const connectFour: Game = {
         const h = holes[r * C4_COLS + c];
         const stone = document.createElement('span');
         stone.className = 'c4-stone';
-        stone.style.background = PLAYER_COLORS[p];
+        stone.style.background = api.color(p);
         stone.style.setProperty('--drop', String(r + 1));
         h.append(stone);
         h.dataset.p = String(p);
@@ -127,7 +128,7 @@ export const muehle: Game = {
     board.append(svg);
 
     const stonesLeft = (n: number, p: P) =>
-      Array.from({ length: n }, () => `<i style="background:${PLAYER_COLORS[p]}"></i>`).join('');
+      Array.from({ length: n }, () => `<i style="background:${api.color(p)}"></i>`).join('');
 
     const render = () => {
       const removable = s.phase === 'remove' ? millRemovable(s) : [];
@@ -138,7 +139,7 @@ export const muehle: Game = {
         const target = selected !== null && s.phase === 'move' && millCanMove(s, selected, i);
         // leerer Punkt: kleiner Punkt (grün, wenn man dorthin ziehen darf); Stein: groß in Spielerfarbe
         stone.setAttribute('r', v !== null ? '0.32' : target ? '0.2' : '0.13');
-        stone.style.fill = v !== null ? PLAYER_COLORS[v] : target ? '#43a047' : '#5d4037';
+        stone.style.fill = v !== null ? api.color(v) : target ? '#43a047' : '#5d4037';
         g.classList.toggle('selected', selected === i);
         g.classList.toggle('removable', removable.includes(i));
         g.classList.toggle('target', target);

@@ -50,7 +50,7 @@ export const icons: Record<string, string> = {
   puzzle: svg('<path d="M8 14 H26 a6 6 0 1 1 12 0 H56 V30 a6 6 0 1 0 0 12 V56 H38 a6 6 0 1 0 -12 0 H8 V42 a6 6 0 1 1 0 -12 Z" fill="#81c784" stroke="#2e7d32" stroke-width="3"/>'),
   guest: svg('<circle cx="32" cy="24" r="12" fill="#cfd8dc" stroke="#546e7a" stroke-width="4"/><path d="M10 58 C12 42 52 42 54 58" fill="#cfd8dc" stroke="#546e7a" stroke-width="4"/><path d="M28 20 a4 4 0 1 1 6 3 c-2 1 -2 2 -2 4 M32 31 v1" stroke="#546e7a" stroke-width="3"/>'),
   replay: svg('<path d="M48 20 A20 20 0 1 0 52 36" stroke="#43a047" stroke-width="7"/><path d="M50 8 V22 H36" stroke="#43a047" stroke-width="7"/>'),
-  versus: svg('<path d="M10 14 L20 40 L30 14 M50 16 C40 10 34 18 42 26 C50 34 44 44 34 38" stroke="#5d4037" stroke-width="6"/>'),
+  versus: svg('<circle cx="32" cy="32" r="28" fill="#fff3e0" stroke="#ff9800" stroke-width="4"/><path d="M36 8 L18 36 H31 L26 56 L46 26 H33 Z" fill="#ffca28" stroke="#e65100" stroke-width="3"/>'),
   stripes: svg('<rect x="10" y="10" width="44" height="44" rx="4" fill="currentColor"/><path d="M10 22 L22 10 M10 38 L38 10 M10 54 L54 10 M26 54 L54 26 M42 54 L54 42" stroke="#fff" stroke-width="5"/>'),
   dots: svg('<rect x="10" y="10" width="44" height="44" rx="4" fill="currentColor"/><g fill="#fff"><circle cx="20" cy="20" r="5"/><circle cx="44" cy="20" r="5"/><circle cx="32" cy="32" r="5"/><circle cx="20" cy="44" r="5"/><circle cx="44" cy="44" r="5"/></g>'),
   swap: svg('<path d="M14 26 A18 18 0 0 1 48 20" stroke="#5d4037" stroke-width="6"/><path d="M50 8 L49 22 L36 19" stroke="#5d4037" stroke-width="6"/><path d="M50 38 A18 18 0 0 1 16 44" stroke="#5d4037" stroke-width="6"/><path d="M14 56 L15 42 L28 45" stroke="#5d4037" stroke-width="6"/>'),
