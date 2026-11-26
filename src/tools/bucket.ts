@@ -1,6 +1,7 @@
 import type { Tool } from './types';
 import { icons } from '../ui/icons';
 import { fillMask, floodFill, floodRegion } from '../paint/flood-fill';
+import { sparkleImage } from './glitter';
 
 export function hexToRgba(hex: string): [number, number, number, number] {
   const n = parseInt(hex.slice(1, 7), 16);
@@ -23,15 +24,21 @@ export function createBucket(): Tool {
         const mask = floodRegion(c.boundary, p.x, p.y);
         if (!mask) return;
         const img = c.ctx.getImageData(0, 0, width, height);
+        const before = c.glitter ? new Uint8ClampedArray(img.data) : null;
         fillMask(img, mask, hexToRgba(c.color));
+        if (before) sparkleImage(img, before, c.color);
         c.ctx.putImageData(img, 0, 0);
         return;
       }
       const img = c.ctx.getImageData(0, 0, width, height);
+      const before = c.glitter ? new Uint8ClampedArray(img.data) : null;
       let filled = 0;
       // ein Lese- und Schreibvorgang für alle (gespiegelten) Punkte
       for (const q of c.points ?? [p]) filled += floodFill(img, q.x, q.y, hexToRgba(c.color));
-      if (filled > 0) c.ctx.putImageData(img, 0, 0);
+      if (filled > 0) {
+        if (before) sparkleImage(img, before, c.color);
+        c.ctx.putImageData(img, 0, 0);
+      }
     },
     move() {},
     end() {},

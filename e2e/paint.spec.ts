@@ -75,3 +75,35 @@ test('Regenbogen öffnet Palette, gewählte Farbe erscheint als eigener Tupfer',
   await expect(custom).toHaveAttribute('data-color', picked!);
   await expect(custom).toHaveClass(/active/);
 });
+
+test('Glitzer-Reiter: Glitzerfarbe malt Funken in den Strich', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  await page.getByTestId('tool-marker').click();
+  await page.getByTestId('rainbow').click();
+  await page.getByTestId('palette-tab-glitter').click();
+  await expect(page.getByTestId('palette')).toHaveAttribute('data-tab', 'glitter');
+  const cells = page.getByTestId('palette').locator('.palette-cell.glitter');
+  await expect(cells).toHaveCount(110);
+  await cells.nth(46).click();
+  await expect(page.getByTestId('custom-color')).toHaveClass(/glitter/);
+  await drawStroke(page);
+  // Im Strich gibt es viele verschiedene Farbtöne (Funken + Schimmer), nicht nur eine Farbe
+  const shades = await page.evaluate(() => {
+    const c = document.querySelector<HTMLCanvasElement>('canvas[data-layer="paint"]')!;
+    const d = c.getContext('2d')!.getImageData(Math.floor(c.width * 0.4), Math.floor(c.height / 2) - 4, 200, 8).data;
+    const set = new Set<string>();
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 200) set.add(`${d[i]},${d[i + 1]},${d[i + 2]}`);
+    return set.size;
+  });
+  expect(shades).toBeGreaterThan(5);
+});
+
+test('Regenbogen und Größe bleiben stehen, wenn die Farben scrollen', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  const before = (await page.getByTestId('rainbow').boundingBox())!.y;
+  await page.locator('.color-scroll').evaluate((el) => (el.scrollTop = 400));
+  expect((await page.getByTestId('rainbow').boundingBox())!.y).toBe(before);
+  await expect(page.locator('.color-fixed [data-testid="size"]')).toBeVisible();
+});

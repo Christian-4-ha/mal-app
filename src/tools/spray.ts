@@ -1,5 +1,6 @@
 import type { StrokePoint, Tool, ToolContext } from './types';
 import { icons } from '../ui/icons';
+import { paintStyle } from './glitter';
 
 /** Sprühdose: Punktwolke, wird dichter, je länger man an einer Stelle bleibt. */
 export function createSpray(): Tool {
@@ -25,7 +26,7 @@ export function createSpray(): Tool {
     defaultSize: 40,
     begin(c, p) {
       at = p;
-      c.ctx.fillStyle = c.color;
+      c.ctx.fillStyle = paintStyle(c);
       puff(c);
       timer = window.setInterval(() => puff(c), 16);
     },

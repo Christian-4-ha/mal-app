@@ -102,6 +102,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       const tools = listTools();
       let tool: Tool = tools[0];
       let color = BASIC_COLORS[0];
+      let glitter = false;
       const sizes = new Map<string, number>(tools.map((t) => [t.id, t.defaultSize]));
       const variants = new Map<string, string | null>(tools.map((t) => [t.id, t.variants?.[0]?.id ?? null]));
       let zoom = false;
@@ -186,28 +187,37 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
       const sizeCtl = createSizeControl((s) => {
         sizes.set(tool.id, s);
       });
-      // Reihenfolge (Feedback): Regenbogen, Größen-Punkt, eigene Farbe, Grundfarben
-      colorCol.append(rainbow, sizeCtl.el, custom);
+      // Regenbogen und Größen-Punkt stehen fest oben; darunter scrollen eigene Farbe und Grundfarben
+      const fixed = document.createElement('div');
+      fixed.className = 'color-fixed';
+      const sep = document.createElement('span');
+      sep.className = 'color-sep';
+      fixed.append(rainbow, sizeCtl.el, sep);
+      const scroll = document.createElement('div');
+      scroll.className = 'color-scroll';
+      colorCol.append(fixed, scroll);
+      scroll.append(custom);
       const swatches: HTMLButtonElement[] = [];
       const addSwatch = (c: string) => {
         const el = document.createElement('button');
         el.classList.add('swatch');
         el.style.background = c;
         el.dataset.color = c;
-        el.onclick = () => selectColor(c);
+        el.onclick = () => selectColor(c, false);
         swatches.push(el);
         return el;
       };
-      for (const c of BASIC_COLORS) colorCol.append(addSwatch(c));
+      for (const c of BASIC_COLORS) scroll.append(addSwatch(c));
       // Zuletzt frei gewählte Farbe (nur in diesem Malbildschirm)
       rainbow.onclick = () =>
-        openPalettePopup(color, (c) => {
+        openPalettePopup(color, glitter, (c, g) => {
           custom.hidden = false;
-          custom.style.background = c;
+          custom.style.backgroundColor = c;
           custom.dataset.color = c;
-          custom.onclick = () => selectColor(c);
+          custom.classList.toggle('glitter', g);
+          custom.onclick = () => selectColor(c, g);
           if (!swatches.includes(custom)) swatches.push(custom);
-          selectColor(c);
+          selectColor(c, g);
         });
 
       // --- Werkzeuge ---
@@ -253,7 +263,8 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
           const v = tools.find((x) => x.id === id)?.variants?.find((x) => x.id === variants.get(id));
           if (badge && v) badge.innerHTML = v.icon;
         }
-        for (const s of swatches) s.classList.toggle('active', s.dataset.color === color);
+        for (const s of swatches)
+          s.classList.toggle('active', s.dataset.color === color && s.classList.contains('glitter') === glitter);
         toolCol.style.color = color;
         sizeCtl.set(sizes.get(tool.id) ?? tool.defaultSize, color, tool.minSize, tool.maxSize);
       };
@@ -261,8 +272,9 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         tool = t;
         refresh();
       }
-      function selectColor(c: string) {
+      function selectColor(c: string, g: boolean) {
         color = c;
+        glitter = g;
         refresh();
       }
       refresh();
@@ -299,6 +311,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         strokeCtx = {
           ctx: useOverlay ? octx : pctx,
           color,
+          glitter,
           size: strokeWidthOnCanvas(sizes.get(tool.id) ?? tool.defaultSize, surface.ratio, surface.view().scale),
           variant: variants.get(tool.id) ?? null,
           boundary: surface.templateData(),

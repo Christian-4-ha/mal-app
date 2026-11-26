@@ -1,5 +1,6 @@
 import type { Tool } from './types';
 import { icons } from '../ui/icons';
+import { paintStyle } from './glitter';
 import { createSmoothLine } from './stroke';
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -21,7 +22,7 @@ export function createBrush(): Tool {
     overlayAlpha: 0.85,
     begin(c, p) {
       size = c.size;
-      c.ctx.strokeStyle = c.ctx.fillStyle = c.color;
+      c.ctx.strokeStyle = c.ctx.fillStyle = paintStyle(c);
       c.ctx.shadowColor = c.color;
       c.ctx.shadowBlur = c.size * 0.35; // weicher Rand
       line.begin(c.ctx, p);

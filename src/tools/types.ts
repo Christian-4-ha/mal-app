@@ -17,6 +17,8 @@ export interface ToolContext {
   boundary?: ImageData | null;
   /** Mandala: Radierer zeichnet die Radierfläche als deckende Maske statt zu radieren. */
   maskOnly?: boolean;
+  /** Glitzerfarbe (helle Funken in der Farbe, wie Glitzerkleber). */
+  glitter?: boolean;
   /** Mandala-Eimer: an all diesen Punkten füllen (statt nur am Tippunkt). */
   points?: { x: number; y: number }[];
 }

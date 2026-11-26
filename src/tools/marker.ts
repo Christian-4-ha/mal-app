@@ -1,5 +1,6 @@
 import type { Tool } from './types';
 import { icons } from '../ui/icons';
+import { paintStyle } from './glitter';
 import { createSmoothLine } from './stroke';
 
 export function createMarker(): Tool {
@@ -15,7 +16,7 @@ export function createMarker(): Tool {
     overlayAlpha: 0.8,
     begin(c, p) {
       size = c.size;
-      c.ctx.strokeStyle = c.ctx.fillStyle = c.color;
+      c.ctx.strokeStyle = c.ctx.fillStyle = paintStyle(c);
       line.begin(c.ctx, p);
     },
     move: (c, p) => line.move(c.ctx, p),

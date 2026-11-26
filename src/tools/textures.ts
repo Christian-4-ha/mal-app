@@ -1,3 +1,5 @@
+import { addSparkles } from './glitter';
+
 /** Prozedural erzeugte 64×64-Texturkacheln je Farbe und Oberfläche (gecacht). */
 const SIZE = 64;
 const cache = new Map<string, HTMLCanvasElement>();
@@ -8,6 +10,22 @@ function rng(seed: number) {
     seed = (seed * 1664525 + 1013904223) >>> 0;
     return seed / 2 ** 32;
   };
+}
+
+/** Musterkachel mit Glitzerfunken (für Glitzerfarben). */
+export function sparkledTile(color: string, variant: string): HTMLCanvasElement {
+  const key = color + '|' + variant + '|glitter';
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const c = document.createElement('canvas');
+  c.width = c.height = SIZE;
+  const ctx = c.getContext('2d')!;
+  ctx.drawImage(textureTile(color, variant), 0, 0);
+  const img = ctx.getImageData(0, 0, SIZE, SIZE);
+  addSparkles(img);
+  ctx.putImageData(img, 0, 0);
+  cache.set(key, c);
+  return c;
 }
 
 export function textureTile(color: string, variant: string): HTMLCanvasElement {
