@@ -107,7 +107,10 @@ function colorPick(
         if (chosen[1 - p] === c || chosen[0] && chosen[1]) return;
         chosen[p] = c;
         update();
-        if (chosen[0] && chosen[1]) setTimeout(() => done([chosen[0]!, chosen[1]!]), 600);
+        if (chosen[0] && chosen[1]) {
+          const t = window.setTimeout(() => host.isConnected && done([chosen[0]!, chosen[1]!]), 600);
+          cleanups.push(() => clearTimeout(t));
+        }
       };
       grid.append(b);
     });
@@ -133,13 +136,7 @@ function colorPick(
 }
 
 /** Gemeinsamer Rahmen für Zwei-Spieler-Spiele an einem iPad. Zeit zählt für owner. */
-export function gameScreen(
-  owner: Profile,
-  players: [Player, Player],
-  game: Game,
-  first: P = 0,
-  chosenColors?: [string, string],
-): Screen {
+export function gameScreen(owner: Profile, players: [Player, Player], game: Game, first: P = 0): Screen {
   const cleanups: (() => void)[] = [];
   let stopGame = () => {};
   return {
@@ -159,7 +156,7 @@ export function gameScreen(
       root.append(home, badges[0], board, badges[1]);
 
       let round = first;
-      let colors: [string, string] = chosenColors ?? [GAME_COLORS[0], GAME_COLORS[1]];
+      let colors: [string, string] = [GAME_COLORS[0], GAME_COLORS[1]];
       const start = (f: P) => {
         stopGame();
         root.querySelector('.game-over')?.remove();
@@ -221,11 +218,8 @@ export function gameScreen(
         root.classList.remove('picking');
         start(round);
       };
-      if (chosenColors) begin(chosenColors);
-      else {
-        root.classList.add('picking');
-        colorPick(root, players, game, cleanups, begin);
-      }
+      root.classList.add('picking');
+      colorPick(root, players, game, cleanups, begin);
       cleanups.push(() => stopGame());
       cleanups.push(startTimeLimit(owner, root, () => navigate(dayOverScreen(owner))));
     },

@@ -1,11 +1,14 @@
 import sceneSvg from '../assets/start-bild.svg?raw';
 
 const KEY = 'ente-intro';
+// Zusätzlich im Speicher, falls sessionStorage nicht geht (dann nur bis zum Neuladen)
+let seen = false;
 /** Länge der Startanimation (ms); danach erscheinen die Profile. */
 export const INTRO_MS = 5200;
 
 /** Lief die Startanimation in dieser App-Sitzung schon? */
 export function introSeen(): boolean {
+  if (seen) return true;
   try {
     return sessionStorage.getItem(KEY) === '1';
   } catch {
@@ -14,6 +17,7 @@ export function introSeen(): boolean {
 }
 
 function markIntroSeen(): void {
+  seen = true;
   try {
     sessionStorage.setItem(KEY, '1');
   } catch {

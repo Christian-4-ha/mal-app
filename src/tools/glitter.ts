@@ -48,20 +48,39 @@ interface Pixels {
   data: Uint8ClampedArray;
 }
 
-/** Eimer mit Glitzer: alle Pixel, die sich gegenüber `before` geändert haben, bekommen Glitzer (Deckkraft bleibt). */
-export function sparkleImage(img: Pixels, before: Uint8ClampedArray, color: string): void {
-  const base = hexToRgba(color).slice(0, 3) as RGB;
+/**
+ * Eimer mit Glitzer: malt alle Pixel der Maske deckend in Glitzerfarbe (gleiches Bild wie glitterRGB).
+ * Ohne Zwischenobjekte je Pixel, weil eine Fläche Millionen Pixel haben kann (altes iPad).
+ */
+export function paintGlitter(img: Pixels, mask: Uint8Array, color: string): void {
+  const [br, bg, bb] = hexToRgba(color);
   const d = img.data;
-  for (let y = 0; y < img.height; y++)
-    for (let x = 0; x < img.width; x++) {
-      const i = (y * img.width + x) * 4;
-      if (d[i] === before[i] && d[i + 1] === before[i + 1] && d[i + 2] === before[i + 2] && d[i + 3] === before[i + 3])
-        continue;
-      const [r, g, b] = glitterRGB(base, x, y);
-      d[i] = r;
-      d[i + 1] = g;
-      d[i + 2] = b;
+  const w = img.width;
+  for (let p = 0; p < mask.length; p++) {
+    if (!mask[p]) continue;
+    const x = p % w;
+    const y = (p - x) / w;
+    const i = p * 4;
+    const h = hash(x >> 2, y >> 2);
+    let k = 0;
+    if (h < DENSITY) {
+      const cx = (x & 3) === 1 || (x & 3) === 2;
+      const cy = (y & 3) === 1 || (y & 3) === 2;
+      k = cx && cy ? 0.9 : cx || cy ? 0.405 : 0;
     }
+    if (k > 0) {
+      const yellow = h >= DENSITY / 2;
+      d[i] = 255 * k + br * (1 - k);
+      d[i + 1] = (yellow ? 248 : 255) * k + bg * (1 - k);
+      d[i + 2] = (yellow ? 170 : 255) * k + bb * (1 - k);
+    } else {
+      const f = 0.91 + hash((x >> 2) + 7919, (y >> 2) + 104729) * 0.18;
+      d[i] = br * f;
+      d[i + 1] = bg * f;
+      d[i + 2] = bb * f;
+    }
+    d[i + 3] = 255;
+  }
 }
 
 /** Setzt Funken auf sichtbare Pixel (z. B. Musterkacheln), ohne die übrige Struktur zu ändern. */

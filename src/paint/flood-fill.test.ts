@@ -94,3 +94,28 @@ describe('floodRegion / fillMask (Vorlagenlinien als Grenze)', () => {
     expect(px(paint, 3, 10)).toEqual([0, 0, 0, 0]);
   });
 });
+
+import { floodMask } from './flood-fill';
+
+describe('floodMask (Glitzer-Flächen neu füllen)', () => {
+  it('nimmt kleine eingeschlossene Funken mit (auch am Bildrand), große Linien nicht', () => {
+    const img = blank(40, 40);
+    for (let i = 0; i < 40 * 40; i++) img.data.set([200, 30, 30, 255], i * 4);
+    // Funke (2×2 weiß) mitten in der Fläche
+    for (const [x, y] of [[10, 10], [11, 10], [10, 11], [11, 11]]) set(img, x, y, [255, 255, 255, 255]);
+    set(img, 0, 20, [255, 255, 255, 255]); // Funke am linken Rand
+    // senkrechte schwarze Linie über das ganze Bild (trennt links/rechts)
+    for (let y = 0; y < 40; y++) set(img, 30, y, [0, 0, 0, 255]);
+    const { mask } = floodMask(img as ImageData, 5, 5)!;
+    expect(mask[10 * 40 + 10]).toBe(1); // Funke gehört zur Fläche
+    expect(mask[20 * 40 + 0]).toBe(1); // auch am Rand
+    expect(mask[5 * 40 + 30]).toBe(0); // Linie nicht
+    expect(mask[5 * 40 + 35]).toBe(0); // andere Seite nicht
+  });
+
+  it('liefert die Fläche auch, wenn sie schon genau die Füllfarbe hat', () => {
+    const img = blank(4, 4);
+    const r = floodMask(img as ImageData, 1, 1)!;
+    expect(r.count).toBe(16);
+  });
+});

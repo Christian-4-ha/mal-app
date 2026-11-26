@@ -33,6 +33,8 @@ function bounce(row: HTMLElement, id: string) {
 /** Menü: oben Galerie / Malen / Spielen; eine Gruppe ersetzt diese Ebene durch ihre Modi. */
 export function modeMenuScreen(profile: Profile, group: MenuGroup | null = null): Screen {
   let cleanup = () => undefined as void;
+  // Eine Navigation wartet kurz (Hüpfen); solange sind weitere Tipps gesperrt
+  let pending = 0;
   return {
     name: 'mode-menu',
     mount(root) {
@@ -45,10 +47,20 @@ export function modeMenuScreen(profile: Profile, group: MenuGroup | null = null)
       back.dataset.testid = group ? 'group-back' : 'menu-back';
       back.setAttribute('aria-label', 'Zurück');
       back.innerHTML = icons.back;
-      back.onclick = () => navigate(group ? modeMenuScreen(profile) : profileSelectScreen());
+      back.onclick = () => {
+        if (pending) return;
+        void navigate(group ? modeMenuScreen(profile) : profileSelectScreen());
+      };
       const av = document.createElement('span');
       av.classList.add('small');
       cleanup = renderAvatar(av, profile);
+      const go = (next: () => Screen) => {
+        if (pending) return;
+        pending = window.setTimeout(() => {
+          pending = 0;
+          if (root.isConnected) void navigate(next());
+        }, BOUNCE_MS);
+      };
       top.append(back, av);
       if (group) {
         const g = GROUPS.find((x) => x.id === group)!;
@@ -87,6 +99,7 @@ export function modeMenuScreen(profile: Profile, group: MenuGroup | null = null)
           const tagged: MenuTile[] = items.map((it) => ({
             ...it,
             onTap: () => {
+              if (pending) return;
               markActive(row, it.id);
               bounce(row, it.id);
               it.onTap();
@@ -105,13 +118,14 @@ export function modeMenuScreen(profile: Profile, group: MenuGroup | null = null)
         icon: m.icon,
         label: m.label,
         onTap: () => {
+          if (pending) return;
           markActive(modeRow, m.id);
           bounce(modeRow, m.id);
           if (m.expand) m.expand({ profile }, rows);
           else if (m.open) {
             rows.setRow(2, null);
             const open = m.open;
-            setTimeout(() => navigate(open({ profile })), BOUNCE_MS);
+            go(() => open({ profile }));
           }
         },
       }));
@@ -122,8 +136,9 @@ export function modeMenuScreen(profile: Profile, group: MenuGroup | null = null)
             icon: g.icon,
             label: g.label,
             onTap: () => {
+              if (pending) return;
               bounce(modeRow, g.id);
-              setTimeout(() => navigate(modeMenuScreen(profile, g.id)), BOUNCE_MS);
+              go(() => modeMenuScreen(profile, g.id));
             },
           });
       const modeRow = createTileRow(tiles, { size: group ? 200 : 250 });
@@ -132,6 +147,8 @@ export function modeMenuScreen(profile: Profile, group: MenuGroup | null = null)
       root.append(top, modeRow);
     },
     unmount() {
+      clearTimeout(pending);
+      pending = 0;
       cleanup();
     },
   };
