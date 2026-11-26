@@ -14,12 +14,12 @@ test('Menü zeigt drei beschriftete Kacheln: Galerie, Malen, Spielen', async ({ 
 test('Malen und Spielen zeigen ihre Modi, Zurück führt in die Gruppe', async ({ page }) => {
   await createAndOpenProfile(page, 'Mia');
   await page.getByTestId('tile-paint').click();
-  await expect(page.locator('[data-row="1"] [data-tile]')).toHaveText(['Freies Malen', 'Ausmalen', 'Mandala']);
+  await expect(page.locator('[data-row="1"] .tile-label')).toHaveText(['Freies Malen', 'Ausmalen', 'Mandala', 'Punkte verbinden']);
   await page.getByTestId('tile-coloring').click();
   await expect(page.locator('[data-row="2"] .tile-label').first()).toHaveText('Fabelwesen');
   await page.getByTestId('group-back').click();
   await page.getByTestId('tile-play').click();
-  await expect(page.locator('[data-row="1"] [data-tile]')).toHaveText(['Tic-Tac-Toe', 'Vier gewinnt', 'Mühle', 'Puzzle']);
+  await expect(page.locator('[data-row="1"] .tile-label')).toHaveText(['Tic-Tac-Toe', 'Vier gewinnt', 'Mühle', 'Puzzle', 'Fehler finden']);
   await page.getByTestId('group-back').click();
   await openFreePaint(page);
   await page.getByTestId('home').click();

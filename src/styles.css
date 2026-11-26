@@ -432,3 +432,17 @@ svg { display: block; width: 100%; height: 100%; }
 }
 @keyframes lametta-fall { to { top: 110%; } }
 @keyframes lametta-sway { from { transform: rotate(-18deg) scaleX(1); } to { transform: rotate(18deg) scaleX(.4); } }
+
+/* --- Fehler finden --- */
+.spotdiff-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #e8f5e9; }
+.diff-pair { display: flex; gap: 14px; }
+.diff-panel { display: block; width: 47vw; height: 35.25vw; max-height: 76vh; max-width: 101vh; background: #fff; border-radius: 18px; box-shadow: 0 3px 10px rgba(0,0,0,.15); touch-action: none; }
+.diff-stroke { fill: none; stroke: #e53935; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; opacity: .85; }
+.diff-stroke.fade { transition: opacity .9s; opacity: 0; }
+.marks .found { fill: none; stroke: #e53935; stroke-width: 9; animation: tile-pop .4s ease-out both; transform-box: fill-box; transform-origin: center; }
+.marks .hint { fill: none; stroke: #ffb300; stroke-width: 9; stroke-dasharray: 18 12; animation: blink .8s infinite; }
+.diff-progress { display: flex; gap: 14px; }
+.diff-box { display: block; width: 46px; height: 46px; border-radius: 12px; background: #fff; border: 4px solid #a5d6a7; box-sizing: border-box; }
+.diff-box.found { background: #ffd54f; border-color: #f9a825; animation: tile-bounce .4s ease both; }
+.diff-help { position: absolute; right: 16px; top: 16px; z-index: 5; width: 84px; height: 84px; opacity: 0; pointer-events: none; transition: opacity .5s; }
+.diff-help.show { opacity: 1; pointer-events: auto; animation: tile-bounce 1.2s ease-in-out 3; }
