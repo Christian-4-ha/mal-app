@@ -134,5 +134,13 @@ test('Stempel hat Blüten, Sonnen und Wolken', async ({ page }) => {
   for (const v of ['flower', 'sun', 'cloud']) await expect(pop.locator(`[data-variant="${v}"]`)).toBeVisible();
   await pop.locator('[data-variant="flower"]').click();
   await drawStroke(page);
-  expect(await centerAlpha(page)).toBeGreaterThan(0);
+  // Blüten liegen mit Abstand: irgendwo auf der Strichhöhe muss gemalt sein, mit gelber Mitte
+  const colors = await page.evaluate(() => {
+    const c = document.querySelector<HTMLCanvasElement>('canvas[data-layer="paint"]')!;
+    const d = c.getContext('2d')!.getImageData(0, Math.floor(c.height / 2) - 10, c.width, 20).data;
+    const set = new Set<string>();
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] === 255) set.add(`${d[i]},${d[i + 1]},${d[i + 2]}`);
+    return [...set];
+  });
+  expect(colors).toContain('255,213,79');
 });
