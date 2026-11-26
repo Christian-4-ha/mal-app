@@ -1,5 +1,9 @@
 {
   "images": [
+    {"id": "meer", "file": "meer.jpg", "name": "Unterwasser"},
+    {"id": "bauernhof", "file": "bauernhof.jpg", "name": "Bauernhof"},
+    {"id": "dinos", "file": "dinos.jpg", "name": "Dinos"},
+    {"id": "feuerwehr", "file": "feuerwehr.jpg", "name": "Feuerwehr"},
     {"id": "fw-einhorn", "template": "fw-einhorn", "name": "Einhorn"},
     {"id": "fw-fee", "template": "fw-fee", "name": "Fee"},
     {"id": "fw-meerjungfrau", "template": "fw-meerjungfrau", "name": "Meerjungfrau"},

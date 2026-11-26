@@ -45,6 +45,7 @@ test('Puzzle mit 6 Teilen lässt sich zusammensetzen', async ({ page }) => {
   await createAndOpenProfile(page);
   await page.getByTestId('tile-play').click();
   await page.getByTestId('tile-puzzle').click();
+  await expect(page.locator('[data-row="2"] [data-tile]').first()).toHaveAttribute('data-tile', 'meer');
   await page.locator('[data-row="2"] [data-tile]').first().click();
   await page.getByTestId('pieces-6').click();
   const pieces = page.getByTestId('puzzle-piece');

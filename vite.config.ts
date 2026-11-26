@@ -8,7 +8,7 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: false,
       pwaAssets: { config: true },
-      workbox: { globPatterns: ['**/*.{js,css,html,svg,png,json}'] },
+      workbox: { globPatterns: ['**/*.{js,css,html,svg,png,jpg,json}'] },
       manifest: {
         name: 'EnteTaino',
         short_name: 'EnteTaino',
