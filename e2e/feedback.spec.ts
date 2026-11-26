@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { createAndOpenProfile, drawStroke, openFreePaint } from './helpers';
 
 test('Größen-Punkt steht direkt unter dem Regenbogen, vor den Farben', async ({ page }) => {

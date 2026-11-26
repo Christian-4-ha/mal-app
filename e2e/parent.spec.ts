@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { createAndOpenProfile, drawStroke, enterPin, openFreePaint } from './helpers';
 
 test('Elternbereich nur mit richtiger PIN', async ({ page }) => {

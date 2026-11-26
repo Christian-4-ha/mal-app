@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { createAndOpenProfile, drawStroke, enterPin, openFreePaint } from './helpers';
 
 test('Beim allerersten Start wird zuerst die Eltern-PIN festgelegt', async ({ page }) => {

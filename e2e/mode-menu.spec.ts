@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { firstStartToNewProfile } from './helpers';
 
 test('Galerie steht oben links vor Freies Malen', async ({ page }) => {

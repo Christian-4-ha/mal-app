@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { centerAlpha, createAndOpenProfile, drawStroke, openFreePaint } from './helpers';
 
 test('Leere Galerie zeigt leeren Bilderrahmen', async ({ page }) => {

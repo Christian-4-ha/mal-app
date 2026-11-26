@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { firstStartToNewProfile } from './helpers';
 
 test('Profil anlegen und auswählen', async ({ page }) => {

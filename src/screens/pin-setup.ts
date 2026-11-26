@@ -13,7 +13,7 @@ export function pinSetupScreen(): Screen {
     mount(root) {
       root.classList.add('parent-form');
       root.innerHTML = `
-        <h1>Willkommen bei Taino</h1>
+        <h1>Willkommen bei EnteTaino</h1>
         <p class="hint">Für Eltern: Bitte zuerst eine 4-stellige Eltern-PIN festlegen.<br>
         Sie schützt das Anlegen von Profilen, die Nutzungszeit und den Elternbereich.</p>
         <button class="primary" data-testid="pin-setup-start">PIN festlegen</button>`;

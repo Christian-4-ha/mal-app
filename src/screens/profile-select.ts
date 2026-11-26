@@ -13,6 +13,7 @@ import { modeMenuScreen } from './mode-menu';
 import { parentAreaScreen } from './parent-area';
 import { dailyPromptScreen } from './daily-prompt';
 import { galleryScreen } from './gallery';
+import { mountScene, playIntro } from '../ui/intro';
 
 export function profileSelectScreen(): Screen {
   const cleanups: (() => void)[] = [];
@@ -22,7 +23,7 @@ export function profileSelectScreen(): Screen {
       root.classList.add('profile-select');
       const brand = document.createElement('h1');
       brand.className = 'brand';
-      brand.textContent = 'Taino';
+      brand.textContent = 'EnteTaino';
       root.append(brand);
       const list = document.createElement('div');
       list.className = 'profile-list';
@@ -46,7 +47,10 @@ export function profileSelectScreen(): Screen {
         if (await requestPin()) navigate(profileEditScreen(null, profileSelectScreen));
       };
 
+      const scene = mountScene(root);
       void (async () => {
+        await playIntro(root, scene);
+        if (!root.isConnected) return;
         const profiles = await listProfiles();
         // Erste Öffnung des Tages: Nutzungszeit der Kinder für heute abfragen
         const children = profiles.filter((p) => !isAdult(p));

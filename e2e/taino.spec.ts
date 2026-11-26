@@ -1,5 +1,6 @@
-import { test, expect, type Page } from '@playwright/test';
-import { createAndOpenProfile, enterPin, firstStartToNewProfile } from './helpers';
+import { test, expect, type Page } from './fixtures';
+import { test as plain } from '@playwright/test';
+import { createAndOpenProfile, enterPin, firstStartToNewProfile, setupPinFlow } from './helpers';
 
 /** Alpha der Malebene an einer relativen Position (0..1). */
 async function alphaAt(page: Page, fx: number, fy: number): Promise<number> {
@@ -12,11 +13,30 @@ async function alphaAt(page: Page, fx: number, fy: number): Promise<number> {
   );
 }
 
-test('Startseite heißt Taino', async ({ page }) => {
+test('Startseite heißt EnteTaino', async ({ page }) => {
   await createAndOpenProfile(page);
-  await expect(page).toHaveTitle('Taino');
+  await expect(page).toHaveTitle('EnteTaino');
   await page.getByRole('button', { name: 'Zurück' }).click();
-  await expect(page.locator('.brand')).toHaveText('Taino');
+  await expect(page.locator('.brand')).toHaveText('EnteTaino');
+});
+
+plain('Startanimation mit Ente läuft vor den Profilen und lässt sich antippen', async ({ page }) => {
+  await page.goto('/mal-app/');
+  await page.getByTestId('pin-setup-start').click();
+  await setupPinFlow(page);
+  await page.getByTestId('intro').click();
+  await expect(page.getByTestId('profile-add')).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId('profile-add')).toBeVisible();
+  await expect(page.getByTestId('intro')).toHaveCount(0); // nur einmal je Sitzung
+  await page.evaluate(() => sessionStorage.clear());
+  await page.reload();
+  await expect(page.getByTestId('intro')).toBeVisible();
+  await expect(page.locator('.start-scene .duck-run')).toHaveCount(1);
+  await expect(page.locator('.profile-select')).toHaveClass(/intro-playing/);
+  await page.getByTestId('intro').click();
+  await expect(page.locator('.profile-select')).not.toHaveClass(/intro-playing/);
+  await expect(page.getByTestId('profile-add')).toBeVisible();
 });
 
 test('Mandala mit 1 Achse: ein Strich links erscheint gespiegelt rechts', async ({ page }) => {

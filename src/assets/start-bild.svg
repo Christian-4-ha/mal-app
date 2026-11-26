@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#b3e5fc"/>
@@ -6,6 +6,7 @@
     </linearGradient>
   </defs>
   <rect width="1600" height="1000" fill="url(#sky)"/>
+  <g class="part p-sun">
   <!-- Sonne -->
   <g transform="translate(1250 140)">
     <circle r="70" fill="#ffeb3b" stroke="#fbc02d" stroke-width="6"/>
@@ -15,6 +16,8 @@
     <path d="M-25 15 Q0 40 25 15" stroke="#5d4037" stroke-width="7" fill="none" stroke-linecap="round"/>
     <circle cx="-22" cy="-12" r="7" fill="#5d4037"/><circle cx="22" cy="-12" r="7" fill="#5d4037"/>
   </g>
+  </g>
+  <g class="part p-rainbow">
   <!-- Regenbogen -->
   <g fill="none" stroke-width="34" opacity=".85">
     <path d="M60 760 A420 420 0 0 1 900 760" stroke="#ef5350"/>
@@ -24,11 +27,15 @@
     <path d="M196 760 A284 284 0 0 1 764 760" stroke="#42a5f5"/>
     <path d="M230 760 A250 250 0 0 1 730 760" stroke="#ab47bc"/>
   </g>
+  </g>
+  <g class="part p-clouds">
   <!-- Wolken -->
   <g fill="#fff">
     <path d="M150 170 a50 50 0 0 1 90 -30 a60 60 0 0 1 110 20 a45 45 0 0 1 10 90 H160 a40 40 0 0 1 -10 -80 Z"/>
     <path d="M1000 120 a40 40 0 0 1 75 -25 a50 50 0 0 1 90 15 a38 38 0 0 1 8 75 H1010 a34 34 0 0 1 -10 -65 Z"/>
   </g>
+  </g>
+  <g class="part p-meadow">
   <!-- Wiese -->
   <path d="M0 760 Q400 700 800 760 T1600 740 V1000 H0 Z" fill="#9ccc65"/>
   <path d="M0 830 Q420 790 820 840 T1600 820 V1000 H0 Z" fill="#7cb342"/>
@@ -36,7 +43,8 @@
     <circle cx="560" cy="900" r="12"/><circle cx="1000" cy="930" r="12"/><circle cx="760" cy="960" r="10"/>
   </g>
   <g fill="#f48fb1"><circle cx="620" cy="940" r="10"/><circle cx="880" cy="880" r="10"/></g>
-
+  </g>
+  <g class="part p-easel">
   <!-- Staffelei mit Bild -->
   <g transform="translate(150 470)">
     <path d="M40 0 L0 380 M160 0 L200 380 M100 0 V380" stroke="#8d6e63" stroke-width="16" stroke-linecap="round"/>
@@ -46,6 +54,8 @@
     <path d="M130 60 q20 -30 40 0 q20 30 -20 50 q-40 -20 -20 -50 Z" fill="#ef5350"/>
     <rect x="-20" y="196" width="240" height="18" rx="6" fill="#8d6e63"/>
   </g>
+  </g>
+  <g class="part p-kid1">
   <!-- Kind 1: malt -->
   <g transform="translate(430 560)">
     <path d="M-60 330 L-40 150 Q0 120 40 150 L60 330 Z" fill="#ff7043"/>
@@ -58,7 +68,8 @@
     <path d="M-22 112 Q0 132 22 112" stroke="#3e2723" stroke-width="6" fill="none" stroke-linecap="round"/>
     <circle cx="-44" cy="108" r="10" fill="#ef9a9a" opacity=".7"/><circle cx="44" cy="108" r="10" fill="#ef9a9a" opacity=".7"/>
   </g>
-
+  </g>
+  <g class="part p-table">
   <!-- Spieltisch mit Brettspiel -->
   <g transform="translate(1090 720)">
     <rect x="-40" y="60" width="420" height="30" rx="10" fill="#a1887f"/>
@@ -68,6 +79,8 @@
     <rect x="300" y="30" width="34" height="34" rx="6" fill="#fff" stroke="#5d4037" stroke-width="4"/>
     <g fill="#5d4037"><circle cx="310" cy="40" r="4"/><circle cx="324" cy="54" r="4"/><circle cx="317" cy="47" r="4"/></g>
   </g>
+  </g>
+  <g class="part p-kid2">
   <!-- Kind 2 -->
   <g transform="translate(1040 600)">
     <path d="M-55 260 L-40 120 Q0 95 40 120 L55 260 Z" fill="#ab47bc"/>
@@ -77,6 +90,8 @@
     <circle cx="-20" cy="58" r="7" fill="#3e2723"/><circle cx="22" cy="58" r="7" fill="#3e2723"/>
     <path d="M-20 84 Q0 104 20 84" stroke="#3e2723" stroke-width="6" fill="none" stroke-linecap="round"/>
   </g>
+  </g>
+  <g class="part p-kid3">
   <!-- Kind 3 -->
   <g transform="translate(1500 610)">
     <path d="M-55 250 L-40 110 Q0 85 40 110 L55 250 Z" fill="#26a69a"/>
@@ -86,9 +101,26 @@
     <circle cx="-20" cy="54" r="7" fill="#212121"/><circle cx="20" cy="54" r="7" fill="#212121"/>
     <path d="M-22 78 Q0 102 22 78 Z" fill="#fff" stroke="#212121" stroke-width="5" stroke-linejoin="round"/>
   </g>
+  </g>
+  <g class="part p-blobs">
   <!-- Farbkleckse -->
   <g opacity=".9">
     <circle cx="60" cy="940" r="26" fill="#ef5350"/><circle cx="110" cy="960" r="16" fill="#42a5f5"/>
     <circle cx="1560" cy="960" r="20" fill="#fdd835"/>
   </g>
+  </g>
+  <!-- Ente: hüpft beim Start quer durchs Bild und bleibt dann sitzen -->
+  <g class="duck-run"><g class="duck-hop"><g transform="translate(800 905)">
+    <ellipse cx="0" cy="12" rx="70" ry="10" fill="#558b2f" opacity=".35"/>
+    <path d="M-8 -12 L-14 10 M14 -12 L10 10" stroke="#fb8c00" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-30 10 H-2 M-4 10 H22" stroke="#fb8c00" stroke-width="7" stroke-linecap="round"/>
+    <path d="M-72 -62 Q-96 -92 -78 -100 Q-60 -78 -48 -74 Z" fill="#fdd835" stroke="#f9a825" stroke-width="4" stroke-linejoin="round"/>
+    <ellipse cx="-10" cy="-50" rx="70" ry="46" fill="#fdd835" stroke="#f9a825" stroke-width="5"/>
+    <path d="M-42 -58 Q-6 -84 22 -54 Q-6 -30 -42 -58 Z" fill="#fbc02d" stroke="#f9a825" stroke-width="4"/>
+    <circle cx="42" cy="-112" r="42" fill="#fdd835" stroke="#f9a825" stroke-width="5"/>
+    <path d="M74 -112 Q112 -116 116 -100 Q100 -88 74 -96 Z" fill="#fb8c00" stroke="#e65100" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="54" cy="-122" r="8" fill="#3e2723"/><circle cx="57" cy="-125" r="3" fill="#fff"/>
+    <circle cx="40" cy="-98" r="9" fill="#ef9a9a" opacity=".7"/>
+    <path d="M30 -150 Q40 -170 48 -152" stroke="#f9a825" stroke-width="5" fill="none" stroke-linecap="round"/>
+  </g></g></g>
 </svg>

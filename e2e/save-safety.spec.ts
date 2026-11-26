@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { createAndOpenProfile, drawStroke, openFreePaint } from './helpers';
 
 test('Speichern beim Zurückgehen schlägt fehl → Malbildschirm bleibt, Fehlersymbol', async ({ page }) => {

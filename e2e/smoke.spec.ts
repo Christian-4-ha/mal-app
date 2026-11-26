@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
 test('App startet und zeigt Wurzel', async ({ page }) => {
   await page.goto('/mal-app/');
