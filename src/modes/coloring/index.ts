@@ -10,6 +10,8 @@ const img = (src: string) => `<img src="${src}" alt="" draggable="false">`;
 export const coloringMode: Mode = {
   id: 'coloring',
   icon: icons.coloring,
+  label: 'Ausmalen',
+  group: 'paint',
   order: 20,
   async expand({ profile }, rows) {
     const source = getTemplateSource();
@@ -19,6 +21,7 @@ export const coloringMode: Mode = {
       themes.map((th) => ({
         id: th.id,
         icon: img(source.previewUrl(th)),
+        label: th.name,
         onTap: async () => {
           const list = await source.listTemplates(th.id);
           rows.setRow(
@@ -26,6 +29,7 @@ export const coloringMode: Mode = {
             list.map((t) => ({
               id: t.id,
               icon: img(source.previewUrl(t)),
+              label: t.name,
               onTap: () => navigate(paintScreen({ profile, modeId: 'coloring', templateId: t.id })),
             })),
           );

@@ -1,11 +1,15 @@
 export interface Theme {
   id: string;
+  /** Beschriftung unter der Kachel */
+  name?: string;
   /** Pfad relativ zu templates/ (Symbolbild) */
   icon: string;
 }
 
 export interface TemplateInfo {
   id: string;
+  /** Beschriftung unter der Kachel */
+  name?: string;
   theme: string;
   /** Pfad relativ zu templates/ */
   file: string;

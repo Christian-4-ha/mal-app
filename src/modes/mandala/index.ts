@@ -22,6 +22,8 @@ export function axesIcon(n: number): string {
 export const mandalaMode: Mode = {
   id: 'mandala',
   icon: icons.mandala,
+  label: 'Mandala',
+  group: 'paint',
   order: 25,
   expand({ profile }, rows) {
     rows.setRow(
@@ -29,6 +31,7 @@ export const mandalaMode: Mode = {
       [1, 2, 3, 4, 5].map((n) => ({
         id: `axes-${n}`,
         icon: axesIcon(n),
+        label: n === 1 ? '1 Achse' : `${n} Achsen`,
         onTap: () => navigate(paintScreen({ profile, modeId: `mandala-${n}` })),
       })),
     );

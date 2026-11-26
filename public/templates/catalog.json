@@ -1,106 +1,128 @@
 {
   "themes": [
     {
-      "id": "fabelwesen"
+      "id": "fabelwesen",
+      "name": "Fabelwesen"
     },
     {
-      "id": "tiere"
+      "id": "tiere",
+      "name": "Tiere"
     },
     {
-      "id": "fahrzeuge"
+      "id": "fahrzeuge",
+      "name": "Fahrzeuge"
     },
     {
-      "id": "dinos"
+      "id": "dinos",
+      "name": "Dinos"
     },
     {
-      "id": "meer"
+      "id": "meer",
+      "name": "Meer"
     }
   ],
   "templates": [
     {
       "id": "katze",
       "theme": "tiere",
-      "file": "tiere/katze.svg"
+      "file": "tiere/katze.svg",
+      "name": "Katze"
     },
     {
       "id": "hund",
       "theme": "tiere",
-      "file": "tiere/hund.svg"
+      "file": "tiere/hund.svg",
+      "name": "Hund"
     },
     {
       "id": "hase",
       "theme": "tiere",
-      "file": "tiere/hase.svg"
+      "file": "tiere/hase.svg",
+      "name": "Hase"
     },
     {
       "id": "elefant",
       "theme": "tiere",
-      "file": "tiere/elefant.svg"
+      "file": "tiere/elefant.svg",
+      "name": "Elefant"
     },
     {
       "id": "loewe",
       "theme": "tiere",
-      "file": "tiere/loewe.svg"
+      "file": "tiere/loewe.svg",
+      "name": "Löwe"
     },
     {
       "id": "schildkroete",
       "theme": "tiere",
-      "file": "tiere/schildkroete.svg"
+      "file": "tiere/schildkroete.svg",
+      "name": "Schildkröte"
     },
     {
       "id": "eule",
       "theme": "tiere",
-      "file": "tiere/eule.svg"
+      "file": "tiere/eule.svg",
+      "name": "Eule"
     },
     {
       "id": "schwein",
       "theme": "tiere",
-      "file": "tiere/schwein.svg"
+      "file": "tiere/schwein.svg",
+      "name": "Schwein"
     },
     {
       "id": "auto",
       "theme": "fahrzeuge",
-      "file": "fahrzeuge/auto.svg"
+      "file": "fahrzeuge/auto.svg",
+      "name": "Auto"
     },
     {
       "id": "langhals",
       "theme": "dinos",
-      "file": "dinos/langhals.svg"
+      "file": "dinos/langhals.svg",
+      "name": "Langhals"
     },
     {
       "id": "fisch",
       "theme": "meer",
-      "file": "meer/fisch.svg"
+      "file": "meer/fisch.svg",
+      "name": "Fisch"
     },
     {
       "id": "fw-einhorn",
       "theme": "fabelwesen",
-      "file": "fabelwesen/einhorn.svg"
+      "file": "fabelwesen/einhorn.svg",
+      "name": "Einhorn"
     },
     {
       "id": "fw-fee",
       "theme": "fabelwesen",
-      "file": "fabelwesen/fee.svg"
+      "file": "fabelwesen/fee.svg",
+      "name": "Fee"
     },
     {
       "id": "fw-meerjungfrau",
       "theme": "fabelwesen",
-      "file": "fabelwesen/meerjungfrau.svg"
+      "file": "fabelwesen/meerjungfrau.svg",
+      "name": "Meerjungfrau"
     },
     {
       "id": "fw-babydrache",
       "theme": "fabelwesen",
-      "file": "fabelwesen/babydrache.svg"
+      "file": "fabelwesen/babydrache.svg",
+      "name": "Babydrache"
     },
     {
       "id": "fw-pegasus",
       "theme": "fabelwesen",
-      "file": "fabelwesen/pegasus.svg"
+      "file": "fabelwesen/pegasus.svg",
+      "name": "Pegasus"
     },
     {
       "id": "fw-drachenvogel",
       "theme": "fabelwesen",
-      "file": "fabelwesen/drachenvogel.svg"
+      "file": "fabelwesen/drachenvogel.svg",
+      "name": "Drachenvogel"
     },
     {
       "id": "einhorn",

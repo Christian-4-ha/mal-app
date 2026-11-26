@@ -45,7 +45,7 @@ export function puzzleScreen(profile: Profile, motif: Motif): Screen {
     mount(root) {
       root.classList.add('puzzle-screen');
       const home = button(icons.home, 'Zurück', 'home', 'icon-btn game-home');
-      home.onclick = () => navigate(modeMenuScreen(profile));
+      home.onclick = () => navigate(modeMenuScreen(profile, 'play'));
       const table = document.createElement('div');
       table.className = 'puzzle-table';
       root.append(table, home);
@@ -238,7 +238,7 @@ export function puzzleScreen(profile: Profile, motif: Motif): Screen {
           chooseCount();
         };
         const back = button(icons.home, 'Zurück', 'game-over-home');
-        back.onclick = () => navigate(modeMenuScreen(profile));
+        back.onclick = () => navigate(modeMenuScreen(profile, 'play'));
         over.append(ok, again, back);
         const colors = ['#e53935', '#fbc02d', '#43a047', '#1e88e5', '#8e24aa'];
         for (let i = 0; i < 50; i++) {

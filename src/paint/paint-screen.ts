@@ -157,7 +157,7 @@ export function paintScreen(opts: PaintScreenOptions): Screen {
         idleTimer = window.setTimeout(() => void doSave(), IDLE_SAVE_MS);
       };
 
-      home.onclick = () => navigate(modeMenuScreen(opts.profile));
+      home.onclick = () => navigate(modeMenuScreen(opts.profile, 'paint'));
       undo.onclick = () => {
         const e = history.undo();
         if (e) {

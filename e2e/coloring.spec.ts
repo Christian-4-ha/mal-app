@@ -2,6 +2,7 @@ import { test, expect, type Page } from './fixtures';
 import { createAndOpenProfile } from './helpers';
 
 async function openFirstTemplate(page: Page) {
+  await page.getByTestId('tile-paint').click();
   await page.getByTestId('tile-coloring').click();
   const themes = page.locator('[data-row="2"] [data-tile]');
   await expect(themes.first()).toBeVisible();
@@ -64,6 +65,7 @@ test('Ausmalbild landet mit Vorlage in der Galerie und öffnet wieder mit Linien
   const p = await probe(page);
   await page.mouse.click(p.corner.x, p.corner.y);
   await page.getByTestId('home').click();
+  await page.getByTestId('group-back').click();
   await page.getByTestId('tile-gallery').click();
   await page.getByTestId('gallery-item').click();
   await expect(page.locator('[data-screen="paint"]')).toHaveAttribute('data-ready', 'true');

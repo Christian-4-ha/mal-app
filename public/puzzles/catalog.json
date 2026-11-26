@@ -1,10 +1,10 @@
 {
   "images": [
-    { "id": "fw-einhorn", "template": "fw-einhorn" },
-    { "id": "fw-fee", "template": "fw-fee" },
-    { "id": "fw-meerjungfrau", "template": "fw-meerjungfrau" },
-    { "id": "fw-babydrache", "template": "fw-babydrache" },
-    { "id": "fw-pegasus", "template": "fw-pegasus" },
-    { "id": "fw-drachenvogel", "template": "fw-drachenvogel" }
+    {"id": "fw-einhorn", "template": "fw-einhorn", "name": "Einhorn"},
+    {"id": "fw-fee", "template": "fw-fee", "name": "Fee"},
+    {"id": "fw-meerjungfrau", "template": "fw-meerjungfrau", "name": "Meerjungfrau"},
+    {"id": "fw-babydrache", "template": "fw-babydrache", "name": "Babydrache"},
+    {"id": "fw-pegasus", "template": "fw-pegasus", "name": "Pegasus"},
+    {"id": "fw-drachenvogel", "template": "fw-drachenvogel", "name": "Drachenvogel"}
   ]
 }

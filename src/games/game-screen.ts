@@ -81,7 +81,7 @@ export function gameScreen(owner: Profile, players: [Player, Player], game: Game
       home.setAttribute('aria-label', 'Zurück');
       home.dataset.testid = 'home';
       home.innerHTML = icons.home;
-      home.onclick = () => navigate(modeMenuScreen(owner));
+      home.onclick = () => navigate(modeMenuScreen(owner, 'play'));
       const badges = [badge(players[0], 0, cleanups), badge(players[1], 1, cleanups)];
       const board = document.createElement('div');
       board.className = 'game-board';

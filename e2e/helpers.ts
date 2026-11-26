@@ -31,6 +31,7 @@ export async function createAndOpenProfile(page: Page, name = 'Lena'): Promise<v
 }
 
 export async function openFreePaint(page: Page): Promise<void> {
+  await page.getByTestId('tile-paint').click();
   await page.getByTestId('tile-free-paint').click();
   await expect(page.locator('[data-screen="paint"] canvas[data-layer="paint"]')).toBeVisible();
 }

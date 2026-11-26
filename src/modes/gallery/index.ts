@@ -4,7 +4,8 @@ import { galleryScreen } from '../../screens/gallery';
 
 export const galleryMode: Mode = {
   id: 'gallery',
-  icon: icons.gallery,
+  icon: icons.menuGallery,
+  label: 'Galerie',
   order: 0,
   pinnedFirst: true,
   open: ({ profile }) => galleryScreen(profile),

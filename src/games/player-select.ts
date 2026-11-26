@@ -18,7 +18,7 @@ export function playerSelectScreen(owner: Profile, game: Game): Screen {
       back.className = 'icon-btn game-home';
       back.setAttribute('aria-label', 'Zurück');
       back.innerHTML = icons.back;
-      back.onclick = () => navigate(modeMenuScreen(owner));
+      back.onclick = () => navigate(modeMenuScreen(owner, 'play'));
       const head = document.createElement('div');
       head.className = 'versus-head';
       const me = document.createElement('span');

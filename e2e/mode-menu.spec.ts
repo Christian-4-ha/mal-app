@@ -1,17 +1,27 @@
 import { test, expect } from './fixtures';
-import { firstStartToNewProfile } from './helpers';
+import { createAndOpenProfile, openFreePaint } from './helpers';
 
-test('Galerie steht oben links vor Freies Malen', async ({ page }) => {
-  await page.goto('/mal-app/');
-  await firstStartToNewProfile(page);
-  await page.getByLabel('Name').fill('Mia');
-  await page.getByRole('button', { name: 'Fertig' }).click();
-  await page.getByTestId('profile-tile').first().click();
+test('Menü zeigt drei beschriftete Kacheln: Galerie, Malen, Spielen', async ({ page }) => {
+  await createAndOpenProfile(page, 'Mia');
   const tiles = page.locator('[data-row="1"] [data-tile]');
-  await expect(tiles).toHaveCount(5);
+  await expect(tiles).toHaveCount(3);
   await expect(tiles.nth(0)).toHaveAttribute('data-tile', 'gallery');
-  await expect(tiles.nth(1)).toHaveAttribute('data-tile', 'free-paint');
-  await expect(tiles.nth(2)).toHaveAttribute('data-tile', 'coloring');
-  await expect(tiles.nth(3)).toHaveAttribute('data-tile', 'mandala');
-  await expect(tiles.nth(4)).toHaveAttribute('data-tile', 'games');
+  await expect(tiles.nth(1)).toHaveAttribute('data-tile', 'paint');
+  await expect(tiles.nth(2)).toHaveAttribute('data-tile', 'play');
+  await expect(page.locator('[data-row="1"] .tile-label')).toHaveText(['Galerie', 'Malen', 'Spielen']);
+});
+
+test('Malen und Spielen zeigen ihre Modi, Zurück führt in die Gruppe', async ({ page }) => {
+  await createAndOpenProfile(page, 'Mia');
+  await page.getByTestId('tile-paint').click();
+  await expect(page.locator('[data-row="1"] [data-tile]')).toHaveText(['Freies Malen', 'Ausmalen', 'Mandala']);
+  await page.getByTestId('tile-coloring').click();
+  await expect(page.locator('[data-row="2"] .tile-label').first()).toHaveText('Fabelwesen');
+  await page.getByTestId('group-back').click();
+  await page.getByTestId('tile-play').click();
+  await expect(page.locator('[data-row="1"] [data-tile]')).toHaveText(['Tic-Tac-Toe', 'Vier gewinnt', 'Mühle', 'Puzzle']);
+  await page.getByTestId('group-back').click();
+  await openFreePaint(page);
+  await page.getByTestId('home').click();
+  await expect(page.locator('[data-screen="mode-menu"]')).toHaveAttribute('data-group', 'paint');
 });

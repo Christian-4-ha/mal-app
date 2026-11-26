@@ -12,6 +12,7 @@ test('Malen, zurück, Galerie zeigt Bild; Weitermalen öffnet es', async ({ page
   await openFreePaint(page);
   await drawStroke(page);
   await page.getByTestId('home').click();
+  await page.getByTestId('group-back').click();
   await page.getByTestId('tile-gallery').click();
   await expect(page.getByTestId('gallery-item')).toHaveCount(1);
   await page.getByTestId('gallery-item').click();
@@ -23,6 +24,7 @@ test('Leere Fläche wird beim Zurückgehen nicht gespeichert', async ({ page }) 
   await createAndOpenProfile(page);
   await openFreePaint(page);
   await page.getByTestId('home').click();
+  await page.getByTestId('group-back').click();
   await page.getByTestId('tile-gallery').click();
   await expect(page.getByTestId('gallery-empty')).toBeVisible();
 });
@@ -36,6 +38,7 @@ test('Mehrfaches schnelles Speichern erzeugt nur einen Eintrag', async ({ page }
   await drawStroke(page, 40);
   await save.click();
   await page.getByTestId('home').click();
+  await page.getByTestId('group-back').click();
   await page.getByTestId('tile-gallery').click();
   await expect(page.getByTestId('gallery-item')).toHaveCount(1);
 });

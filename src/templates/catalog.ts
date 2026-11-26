@@ -12,19 +12,21 @@ const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object
 export function parseCatalog(json: unknown): Catalog {
   const rawThemes = isObj(json) && Array.isArray(json.themes) ? json.themes : [];
   const rawTemplates = isObj(json) && Array.isArray(json.templates) ? json.templates : [];
-  const themeIds = rawThemes.filter((t) => isObj(t) && typeof t.id === 'string').map((t) => (t as { id: string }).id);
+  const themeList = rawThemes.filter((t): t is { id: string; name?: unknown } => isObj(t) && typeof t.id === 'string');
+  const themeIds = themeList.map((t) => t.id);
+  const nameOf = (v: unknown) => (typeof v === 'string' && v ? { name: v } : {});
   const seen = new Set<string>();
   const templates: TemplateInfo[] = [];
   for (const t of rawTemplates) {
     if (!isObj(t) || typeof t.id !== 'string' || typeof t.theme !== 'string' || typeof t.file !== 'string') continue;
     if (seen.has(t.id) || !themeIds.includes(t.theme) || !SAFE_FILE.test(t.file)) continue;
     seen.add(t.id);
-    templates.push({ id: t.id, theme: t.theme, file: t.file, ...(t.hidden === true ? { hidden: true } : {}) });
+    templates.push({ id: t.id, ...nameOf(t.name), theme: t.theme, file: t.file, ...(t.hidden === true ? { hidden: true } : {}) });
   }
   const themes: Theme[] = [];
   for (const id of themeIds) {
     const first = templates.find((t) => t.theme === id && !t.hidden);
-    if (first) themes.push({ id, icon: first.file });
+    if (first) themes.push({ id, ...nameOf(themeList.find((t) => t.id === id)!.name), icon: first.file });
   }
   return { themes, templates };
 }

@@ -8,6 +8,8 @@ export interface AppContext {
 export interface MenuTile {
   id: string;
   icon: string;
+  /** Beschriftung unter der Kachel */
+  label?: string;
   onTap(): void;
 }
 
@@ -17,9 +19,14 @@ export interface MenuRows {
 }
 
 /** Ein Modus öffnet entweder direkt einen Bildschirm (open) oder zeigt Zusatzreihen (expand). */
+/** Gruppen im Menü: Malen und Spielen (ohne Gruppe = oberste Ebene, z. B. Galerie). */
+export type MenuGroup = 'paint' | 'play';
+
 export interface Mode {
   id: string;
   icon: string;
+  label: string;
+  group?: MenuGroup;
   order: number;
   pinnedFirst?: boolean;
   open?(ctx: AppContext): Screen;
@@ -33,8 +40,10 @@ export function registerMode(m: Mode): void {
   modes.set(m.id, m);
 }
 
-export function listModes(): Mode[] {
-  return [...modes.values()].sort(
+/** Alle Modi, oder nur die einer Gruppe (null = oberste Ebene). */
+export function listModes(group?: MenuGroup | null): Mode[] {
+  const all = [...modes.values()].filter((m) => group === undefined || (m.group ?? null) === group);
+  return all.sort(
     (a, b) => Number(!!b.pinnedFirst) - Number(!!a.pinnedFirst) || a.order - b.order,
   );
 }

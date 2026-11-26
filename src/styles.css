@@ -60,7 +60,7 @@ svg { display: block; width: 100%; height: 100%; }
 .parent-form .primary:disabled { opacity: .4; }
 
 /* Modus-Menü */
-.mode-menu { display: flex; flex-direction: column; gap: 22px; padding: 20px 0 20px 28px; box-sizing: border-box; }
+.mode-menu { display: flex; flex-direction: column; gap: 22px; padding: 20px 28px; box-sizing: border-box; }
 .menu-top { display: flex; align-items: center; gap: 18px; }
 .tile-row {
   display: flex; gap: 20px; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
@@ -294,3 +294,40 @@ svg { display: block; width: 100%; height: 100%; }
 @keyframes part-rise { from { opacity: 0; transform: translateY(240px); } }
 @keyframes duck-run { from { transform: translateX(-1000px); } }
 @keyframes duck-hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-110px); } }
+
+/* --- EnteTaino: kindliches Menü mit Beschriftung --- */
+.mode-menu { background: linear-gradient(#e1f5fe, #fff8e1); }
+.tile-img { display: block; width: 100%; height: 100%; pointer-events: none; }
+.tile-img svg, .tile-img img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.tile.labelled { height: auto; padding: 16px 16px 10px; }
+.tile.labelled .tile-img { height: calc(var(--tile, 180px) - 32px); }
+.tile-row[data-row="2"] .tile.labelled, .tile-row[data-row="3"] .tile.labelled { padding: 10px 10px 6px; }
+.tile-row[data-row="2"] .tile.labelled .tile-img, .tile-row[data-row="3"] .tile.labelled .tile-img { height: calc(var(--tile, 150px) - 20px); }
+.tile-label {
+  display: block; margin-top: 6px; font: 700 22px/1.2 'Chalkboard SE', 'Comic Sans MS', 'Marker Felt', sans-serif;
+  color: #5d4037; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tile-row[data-row="2"] .tile-label, .tile-row[data-row="3"] .tile-label { font-size: 18px; }
+.tile { border: 5px solid #ffb74d; border-radius: 34px; }
+.tile:nth-child(5n + 2) { border-color: #81c784; }
+.tile:nth-child(5n + 3) { border-color: #64b5f6; }
+.tile:nth-child(5n + 4) { border-color: #f06292; }
+.tile:nth-child(5n + 5) { border-color: #ba68c8; }
+.tile-row > .tile:first-child { margin-left: auto; }
+.tile-row > .tile:last-child { margin-right: auto; }
+.mode-menu:not(.expanded) > .tile-row[data-row="1"] { margin-top: auto; margin-bottom: auto; }
+.mode-menu[data-group="top"] .tile-row[data-row="1"] { gap: 44px; }
+.mode-menu[data-group="top"] .tile-label { font-size: 30px; }
+.tile-row.enter .tile { animation: tile-pop .5s cubic-bezier(.2, 1.5, .4, 1) both; }
+.tile-row .tile.bounce { animation: tile-bounce .4s ease both; animation-delay: 0s !important; }
+@keyframes tile-pop { from { opacity: 0; transform: scale(.3) rotate(-8deg); } }
+@keyframes tile-bounce {
+  30% { transform: scale(1.12) rotate(-4deg); }
+  60% { transform: scale(.95) rotate(3deg); }
+  100% { transform: none; }
+}
+.menu-title { display: flex; align-items: center; gap: 10px; font: 700 32px 'Chalkboard SE', 'Comic Sans MS', 'Marker Felt', sans-serif; color: #5d4037; }
+.menu-title-img { display: block; width: 56px; height: 56px; }
+.menu-title-img svg { width: 100%; height: 100%; }
+.group-back { width: 84px; height: 84px; background: #ffb300; border-radius: 50%; }
+.brand { font-family: 'Chalkboard SE', 'Comic Sans MS', 'Marker Felt', sans-serif; }

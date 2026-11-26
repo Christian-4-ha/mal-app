@@ -5,6 +5,7 @@ import { createTileRow } from '../ui/tile-row';
 const m = (id: string, order: number): Mode => ({
   id,
   icon: '',
+  label: id,
   order,
   open: () => ({ name: id, mount() {}, unmount() {} }),
 });
@@ -24,6 +25,15 @@ describe('mode registry', () => {
     expect(listModes().map((x) => x.id)).toEqual(['a', 'b']);
   });
 
+  it('filtert nach Gruppe (ohne Gruppe = oberste Ebene)', () => {
+    registerMode(m('gallery', 0));
+    registerMode({ ...m('free-paint', 10), group: 'paint' });
+    registerMode({ ...m('tictactoe', 10), group: 'play' });
+    expect(listModes(null).map((x) => x.id)).toEqual(['gallery']);
+    expect(listModes('paint').map((x) => x.id)).toEqual(['free-paint']);
+    expect(listModes('play').map((x) => x.id)).toEqual(['tictactoe']);
+  });
+
   it('doppelte id wirft', () => {
     registerMode(m('a', 1));
     expect(() => registerMode(m('a', 2))).toThrow();
@@ -31,6 +41,11 @@ describe('mode registry', () => {
 });
 
 describe('createTileRow', () => {
+  it('zeigt die Beschriftung unter der Kachel', () => {
+    const row = createTileRow([{ id: 'a', icon: '<svg></svg>', label: 'Malen', onTap() {} }]);
+    expect(row.querySelector('[data-tile="a"] .tile-label')?.textContent).toBe('Malen');
+  });
+
   it('erzeugt je Eintrag eine Kachel mit Tap-Handler', () => {
     let tapped = '';
     const items = Array.from({ length: 12 }, (_, i) => ({ id: 'k' + i, icon: '<svg></svg>', onTap: () => (tapped = 'k' + i) }));

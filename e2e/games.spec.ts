@@ -3,8 +3,8 @@ import { createAndOpenProfile } from './helpers';
 
 async function startGame(page: Page, game: string) {
   await createAndOpenProfile(page);
-  await page.getByTestId('tile-games').click();
-  await page.locator(`[data-row="2"] [data-tile="${game}"]`).click();
+  await page.getByTestId('tile-play').click();
+  await page.getByTestId(`tile-${game}`).click();
   await page.getByTestId('opponent-guest').click();
   await expect(page.locator(`[data-screen="game"][data-game="${game}"]`)).toBeVisible();
 }
@@ -38,9 +38,9 @@ test('Mühle: nach einer Mühle wird ein Stein genommen', async ({ page }) => {
 
 test('Puzzle mit 6 Teilen lässt sich zusammensetzen', async ({ page }) => {
   await createAndOpenProfile(page);
-  await page.getByTestId('tile-games').click();
-  await page.locator('[data-row="2"] [data-tile="puzzle"]').click();
-  await page.locator('[data-row="3"] [data-tile]').first().click();
+  await page.getByTestId('tile-play').click();
+  await page.getByTestId('tile-puzzle').click();
+  await page.locator('[data-row="2"] [data-tile]').first().click();
   await page.getByTestId('pieces-6').click();
   const pieces = page.getByTestId('puzzle-piece');
   await expect(pieces).toHaveCount(6);

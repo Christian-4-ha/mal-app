@@ -6,6 +6,8 @@ import { svgToImage } from '../templates/svg-image';
 /** Ein Puzzlemotiv: Vorschau für die Kachel und das Bild in voller Größe. */
 export interface Motif {
   id: string;
+  /** Beschriftung unter der Kachel */
+  name: string;
   /** Bildquelle für die Vorschau-Kachel */
   preview: string | Blob;
   load(): Promise<HTMLCanvasElement>;
@@ -50,11 +52,13 @@ async function catalogMotifs(): Promise<Motif[]> {
     const out: Motif[] = [];
     for (const e of json.images ?? []) {
       if (typeof e !== 'object' || !e) continue;
-      const { id, file, template } = e as { id?: unknown; file?: unknown; template?: unknown };
+      const { id, file, template, name } = e as { id?: unknown; file?: unknown; template?: unknown; name?: unknown };
       if (typeof id !== 'string') continue;
+      const label = typeof name === 'string' ? name : '';
       if (typeof file === 'string' && SAFE_FILE.test(file)) {
         out.push({
           id,
+          name: label,
           preview: base + file,
           load: async () => {
             const img = await loadImg(base + file);
@@ -66,6 +70,7 @@ async function catalogMotifs(): Promise<Motif[]> {
         if (!t) continue;
         out.push({
           id,
+          name: label || t.name || '',
           preview: source.previewUrl(t),
           load: async () => {
             const img = (await templateImage(template))!;
@@ -84,6 +89,7 @@ async function catalogMotifs(): Promise<Motif[]> {
 function pictureMotif(p: Picture): Motif {
   return {
     id: 'pic-' + p.id,
+    name: 'Mein Bild',
     preview: p.thumb,
     load: async () => {
       const bmp = await createImageBitmap(p.paint);

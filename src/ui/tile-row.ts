@@ -1,6 +1,7 @@
 export interface TileItem {
   id: string;
   icon: string;
+  label?: string;
   onTap(): void;
 }
 
@@ -20,7 +21,18 @@ export function createTileRow(items: TileItem[], opts: { size?: number } = {}): 
     b.className = 'tile';
     b.dataset.tile = item.id;
     b.dataset.testid = 'tile-' + item.id;
-    b.innerHTML = item.icon;
+    const pic = document.createElement('span');
+    pic.className = 'tile-img';
+    pic.innerHTML = item.icon;
+    b.append(pic);
+    if (item.label) {
+      const l = document.createElement('span');
+      l.className = 'tile-label';
+      l.textContent = item.label;
+      b.append(l);
+      b.classList.add('labelled');
+    }
+    b.style.animationDelay = `${row.children.length * 70}ms`;
     b.onclick = () => item.onTap();
     row.append(b);
   }

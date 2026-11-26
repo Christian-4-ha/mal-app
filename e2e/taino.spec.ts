@@ -41,6 +41,7 @@ plain('Startanimation mit Ente läuft vor den Profilen und lässt sich antippen'
 
 test('Mandala mit 1 Achse: ein Strich links erscheint gespiegelt rechts', async ({ page }) => {
   await createAndOpenProfile(page);
+  await page.getByTestId('tile-paint').click();
   await page.getByTestId('tile-mandala').click();
   await page.locator('[data-row="2"] [data-tile="axes-1"]').click();
   await expect(page.locator('[data-screen="paint"]')).toHaveAttribute('data-ready', 'true');
