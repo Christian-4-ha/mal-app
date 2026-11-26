@@ -124,3 +124,15 @@ test('Wechsel-Knopf am Stempel öffnet die Auswahl, das Feld zeigt danach das He
   await page.getByTestId('variant-switch-texture').click();
   await expect(page.getByTestId('variant-popup').locator('[data-variant]')).toHaveCount(5);
 });
+
+test('Stempel hat Blüten, Sonnen und Wolken', async ({ page }) => {
+  await createAndOpenProfile(page);
+  await openFreePaint(page);
+  await page.getByTestId('variant-switch-pattern').click();
+  const pop = page.getByTestId('variant-popup');
+  await expect(pop.locator('[data-variant]')).toHaveCount(6);
+  for (const v of ['flower', 'sun', 'cloud']) await expect(pop.locator(`[data-variant="${v}"]`)).toBeVisible();
+  await pop.locator('[data-variant="flower"]').click();
+  await drawStroke(page);
+  expect(await centerAlpha(page)).toBeGreaterThan(0);
+});
