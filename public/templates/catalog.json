@@ -19,6 +19,10 @@
     {
       "id": "meer",
       "name": "Meer"
+    },
+    {
+      "id": "punkte",
+      "name": "Punkte"
     }
   ],
   "templates": [
@@ -128,6 +132,41 @@
       "id": "einhorn",
       "theme": "fabelwesen",
       "file": "fabelwesen/einhorn-alt.svg",
+      "hidden": true
+    },
+    {
+      "id": "punkte-stern",
+      "name": "Stern",
+      "theme": "punkte",
+      "file": "punkte/stern.svg",
+      "hidden": true
+    },
+    {
+      "id": "punkte-haus",
+      "name": "Haus",
+      "theme": "punkte",
+      "file": "punkte/haus.svg",
+      "hidden": true
+    },
+    {
+      "id": "punkte-fisch",
+      "name": "Fisch",
+      "theme": "punkte",
+      "file": "punkte/fisch.svg",
+      "hidden": true
+    },
+    {
+      "id": "punkte-ente",
+      "name": "Ente",
+      "theme": "punkte",
+      "file": "punkte/ente.svg",
+      "hidden": true
+    },
+    {
+      "id": "punkte-rakete",
+      "name": "Rakete",
+      "theme": "punkte",
+      "file": "punkte/rakete.svg",
       "hidden": true
     }
   ]

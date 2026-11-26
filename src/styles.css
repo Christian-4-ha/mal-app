@@ -401,3 +401,34 @@ svg { display: block; width: 100%; height: 100%; }
 .ttt-cell svg { position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; }
 .board-connect4 { width: min(88vh, 53vw); height: min(76vh, 46vw); }
 .c4-col { display: flex; flex-direction: column; min-width: 0; cursor: pointer; }
+
+/* --- Punkte verbinden --- */
+.dots-screen { display: flex; align-items: center; justify-content: center; background: #fff8e1; }
+.dots-card { width: min(92vw, 122vh); height: min(69vw, 92vh); background: #fff; border-radius: 26px; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+.dots-svg { display: block; width: 100%; height: 100%; touch-action: none; }
+.dots-extra { fill: none; stroke: #bdbdbd; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.dots-card.done .dots-extra { stroke: #3e2723; }
+.dots-lines line, .dots-rubber { stroke: #1e88e5; stroke-width: 7; stroke-linecap: round; }
+.dots-card.done .dots-lines line { stroke: #3e2723; }
+.dots-rubber { stroke-dasharray: 2 14; opacity: .7; }
+.dot-hit { fill: transparent; }
+.dot-point { fill: #5d4037; }
+.dot.start .dot-point { fill: #43a047; }
+.dot.reached .dot-point { fill: #1e88e5; }
+.dot-num { font: 700 26px 'Chalkboard SE', 'Comic Sans MS', sans-serif; fill: #5d4037; pointer-events: none; }
+.dot.reached .dot-num { fill: #90a4ae; }
+.dot.hint .dot-point { animation: dot-hint 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes dot-hint { 50% { transform: scale(1.9); fill: #ff7043; } }
+.dots-card.done .dot { opacity: 0; transition: opacity .8s; }
+.dots-done { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; align-items: center; justify-content: center; gap: 60px; background: rgba(255,255,255,.55); }
+.dots-done .icon-btn.big { width: 150px; height: 150px; padding: 26px; animation: tile-pop .5s cubic-bezier(.2, 1.5, .4, 1) both; }
+
+/* --- Lametta --- */
+.lametta { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 30; overflow: hidden; pointer-events: none; }
+.lametta span {
+  position: absolute; top: -120px; width: 5px; border-radius: 3px; opacity: .95;
+  animation-name: lametta-fall, lametta-sway; animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: 1, infinite; animation-direction: normal, alternate; animation-fill-mode: forwards, none;
+}
+@keyframes lametta-fall { to { top: 110%; } }
+@keyframes lametta-sway { from { transform: rotate(-18deg) scaleX(1); } to { transform: rotate(18deg) scaleX(.4); } }
